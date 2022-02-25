@@ -11,7 +11,7 @@ namespace EldenRingFPSUnlockAndMore
     /// </summary>
     internal class PatternScan
     {
-        private long dwStart = 0;
+        private static long dwStart = 0;
         private static byte[] bData;
 
         /// <summary>
@@ -140,7 +140,7 @@ namespace EldenRingFPSUnlockAndMore
         //        }
         //
         //        if (found)
-        //            return position;
+        //            return dwStart + position;
         //    }
         //
         //    return -1;
@@ -179,7 +179,7 @@ namespace EldenRingFPSUnlockAndMore
                     }
 
                     if (found)
-                        return i;
+                        return dwStart + i;
                 }
             }
 

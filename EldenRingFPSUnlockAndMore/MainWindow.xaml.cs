@@ -44,14 +44,12 @@ namespace EldenRingFPSUnlockAndMore
             }
             GC.KeepAlive(mutex);
 
-            SafeStartGame();
+            CheckGame();
         }
 
-        /// <summary>
-        /// Kill any running game instance and restart the game in offline mode without EAC.
-        /// </summary>
-        private async void SafeStartGame()
+        private async void CheckGame(bool startUp = true)
         {
+            // check for game
             Process[] procList = Process.GetProcessesByName(GameData.PROCESS_NAME);
             if (procList.Length > 0)
             {
@@ -59,13 +57,14 @@ namespace EldenRingFPSUnlockAndMore
                                                           "Do you want to close and restart it in offline mode without EAC?", "Elden Ring FPS Unlocker and more", MessageBoxButton.YesNoCancel, MessageBoxImage.Warning);
                 if (result == MessageBoxResult.Cancel)
                     Environment.Exit(0);
-                if (result != MessageBoxResult.No)
+                if (result == MessageBoxResult.No)
                 {
+                    bStart.IsEnabled = false;
                     OpenGame();
                     return;
                 }
                 else if (result == MessageBoxResult.Yes)
-                { 
+                {
                     foreach (Process proc in procList)
                     {
                         proc.Kill();
@@ -77,8 +76,20 @@ namespace EldenRingFPSUnlockAndMore
                     if (sc.Status != ServiceControllerStatus.Stopped && sc.Status != ServiceControllerStatus.StopPending)
                         sc.Stop();
                     await Task.Delay(2000);
+                    SafeStartGame();
+                    return;
                 }
             }
+            if (!startUp)
+                SafeStartGame();
+        }
+
+        /// <summary>
+        /// Kill any running game instance and restart the game in offline mode without EAC.
+        /// </summary>
+        private async void SafeStartGame()
+        {
+            UpdateStatus("Starting game...", Brushes.Orange);
 
             // get game path
             string gamePath = GetApplicationPath("ELDEN RING");
@@ -86,6 +97,34 @@ namespace EldenRingFPSUnlockAndMore
             {
                 MessageBox.Show("Couldn't find game installation path!", "Elden Ring FPS Unlocker and more", MessageBoxButton.OK, MessageBoxImage.Exclamation);
                 Environment.Exit(0);
+            }
+
+            // create steam_appid
+            try
+            {
+                File.WriteAllText(Path.Combine(gamePath, "GAME", "steam_appid.txt"), "1245620");
+            }
+            catch
+            {
+                MessageBox.Show("Couldn't write steam id file!", "Elden Ring FPS Unlocker and more", MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                Environment.Exit(0);
+            }
+
+            Process[] procList = Process.GetProcessesByName("steam");
+            if (procList.Length == 0)
+            {
+                ProcessStartInfo startInfo2 = new ProcessStartInfo
+                {
+                    WindowStyle = ProcessWindowStyle.Minimized,
+                    Verb = "open",
+                    FileName = "steam://open/console",
+                };
+                Process process2 = new Process
+                {
+                    StartInfo = startInfo2
+                };
+                process2.Start();
+                await Task.Delay(6000);
             }
 
             // start the game
@@ -109,6 +148,7 @@ namespace EldenRingFPSUnlockAndMore
 
         private void OpenGame()
         {
+            UpdateStatus("Accessing game...", Brushes.Orange);
             Process[] procList = Process.GetProcessesByName(GameData.PROCESS_NAME);
             if (procList.Length != 1)
             {
@@ -126,8 +166,8 @@ namespace EldenRingFPSUnlockAndMore
                 MessageBox.Show("Couldn't gain access to game process!", "Elden Ring FPS Unlocker and more", MessageBoxButton.OK, MessageBoxImage.Exclamation);
                 Environment.Exit(0);
             }
-            UpdateStatus("game init...", Brushes.Orange);
-            bStart.IsEnabled = false;
+            UpdateStatus("Game init...", Brushes.Orange);
+            bPatch.IsEnabled = true;
 
             PatternScan patternScan = new PatternScan(_gameAccessHwnd, _gameProc.MainModule);
 
@@ -137,6 +177,8 @@ namespace EldenRingFPSUnlockAndMore
                 _offset_framelock = 0x0;
             else
                 cbFramelock.IsEnabled = true;
+
+            UpdateStatus("ready...", Brushes.Green);
         }
 
         /// <summary>
@@ -185,7 +227,6 @@ namespace EldenRingFPSUnlockAndMore
             UpdateStatus("Game patched!", Brushes.Green);
             return true;
         }
-
 
         /// <summary>
         /// Gets the install path of an application.
@@ -334,6 +375,12 @@ namespace EldenRingFPSUnlockAndMore
         private void bPatch_Click(object sender, RoutedEventArgs e)
         {
             PatchGame();
+        }
+
+        private void bStart_Click(object sender, RoutedEventArgs e)
+        {
+            bStart.IsEnabled = false;
+            CheckGame(false);
         }
     }
 }
