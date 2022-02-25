@@ -22,8 +22,8 @@ The graphic setup has to be done only once but as the patcher hot-patches the me
 
 The game enforces VSYNC and forces 60 Hz in fullscreen even on 144 Hz monitors so we have to override these.
 
-#### Nvidia: Use Nvidia Control Panel to set 'Vsync' to 'Off' and 'Preferred Refreshrate' to 'Highest available' on a Sekiro Profile. Troubleshoot: delete the (premade) Sekiro profile, add a new profile by stating the full file path to sekiro.exe and try again. If Preferred Refreshrate is missing or game still locks to 60fps see the guide further down on Nvidia Profile Inspector and general troubleshooting.
-#### AMD: Use Radeon Settings to set 'Wait for Vertical Refresh' to 'Enhanced Sync' on a Sekiro profile. Start Sekiro in windowed mode and switch to fullscreen once ingame. Troubleshoot: see the guide further down below.
+#### Nvidia: Use Nvidia Control Panel to set 'Vsync' to 'Off' and 'Preferred Refreshrate' to 'Highest available' on a Elden Ring Profile.
+#### AMD: Use Radeon Settings to set 'Wait for Vertical Refresh' to 'Enhanced Sync' on a Elden Ring profile. Start Elden Ring in windowed mode and switch to fullscreen once ingame. Troubleshoot: see the guide further down below.
 
 #### 60 Hz monitors: disable VSYNC via driver (use 'Enhanced Sync' on AMD) and use fullscreen, see guide below
 #### high refresh rate monitors: use borderless or force monitor to always use highest available refresh rate and then use fullscreen, see guide below
