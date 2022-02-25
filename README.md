@@ -8,7 +8,7 @@ Patches games memory while running, does not modify any game files. Works with e
 
 ## Download
 
-**[Get the latest release here](https://github.com/uberhalit/EldenRingUnlockAndMore/releases)**
+**[Get the latest release here](https://github.com/uberhalit/EldenRingFpsUnlockAndMore/releases)**
 
 ## Features
 
