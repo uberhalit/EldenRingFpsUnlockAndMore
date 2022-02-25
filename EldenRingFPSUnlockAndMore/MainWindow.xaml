@@ -6,20 +6,20 @@
         xmlns:local="clr-namespace:EldenRingFPSUnlockAndMore"
         xmlns:p="clr-namespace:EldenRingFPSUnlockAndMore.Properties" 
         mc:Ignorable="d"
-        Title="Elden Ring FPS Unlocker and more" Width="Auto" Height="Auto" SizeToContent="WidthAndHeight" ResizeMode="CanMinimize" Loaded="Window_Loaded" Closing="Window_Closing" >
+        Title="Elden Ring FPS Unlocker &quot;and more&quot;" Width="Auto" Height="Auto" SizeToContent="WidthAndHeight" ResizeMode="CanMinimize" Loaded="Window_Loaded" Closing="Window_Closing" >
     
     <Grid x:Name="gMainGrid" Background="#FFF9F9F9">
         <DockPanel>
             <StackPanel DockPanel.Dock="Top" Margin="10,10,10,0" Width="300" Height="Auto">
                 <DockPanel LastChildFill="False">
-                    <CheckBox x:Name="cbFramelock" DockPanel.Dock="Left" Margin="0,0,0,0" Height="25" FontSize="14 px" VerticalContentAlignment="Center" Content="Frame rate lock:" ToolTip="Make sure to read the guide" IsChecked="False" IsEnabled="False" TabIndex="1" />
+                    <CheckBox x:Name="cbFramelock" DockPanel.Dock="Left" Margin="0,0,0,0" Height="25" FontSize="14 px" VerticalContentAlignment="Center" Content="Frame rate lock:" ToolTip="Make sure to read the guide" IsChecked="{Binding Source={x:Static p:Settings.Default}, Path=FrameLockTicked, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" TabIndex="1" />
                     <TextBox x:Name="tbFramelock" DockPanel.Dock="Right" Margin="0,0,0,0" Width="116" Height="25" FontSize="14 px" VerticalContentAlignment="Center" Text="{Binding Source={x:Static p:Settings.Default}, Path=FrameLock, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" MaxLength="3" TabIndex="2" />
                 </DockPanel>
-                <Button x:Name="bStart" Margin="0,7,0,0" Width="300" Height="30" FontSize="14 px" IsEnabled="True" Content="Start game" BorderThickness="1" Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}" 
+                <Button x:Name="bStart" Margin="0,7,0,0" Width="300" Height="30" FontSize="14 px" IsEnabled="False" Content="Start game" BorderThickness="1" Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}" 
                     Focusable="False" TabIndex="20" IsTabStop="False" Click="bStart_Click" />
                 <Button x:Name="bPatch" Margin="0,7,0,0" Width="300" Height="30" FontSize="14 px" IsEnabled="False" Content="Patch game" BorderThickness="1" Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}" 
                     Focusable="False" TabIndex="20" IsTabStop="False" Click="bPatch_Click" />
-                <TextBox x:Name="tbStatus" Margin="0,5,0,0" Width="300" Height="25" FontSize="14 px" FontWeight="Bold" Text="waiting for game..." TextAlignment="Center" TextWrapping="NoWrap" IsEnabled="False" />
+                <TextBox x:Name="tbStatus" Margin="0,5,0,0" Width="300" Height="25" FontSize="14 px" FontWeight="Bold" Text="starting up..." TextAlignment="Center" TextWrapping="NoWrap" IsEnabled="False" />
                 <Expander x:Name="exGuide" Margin="0,8,0,0" Height="Auto" FontSize="14 px" Header="ReadMe" IsExpanded="True" TabIndex="22">
                     <TextBlock Margin="2,6,2,0" FontSize="11 px" TextWrapping="WrapWithOverflow" IsEnabled="False">
                         <TextBlock.Inlines>
@@ -36,7 +36,7 @@
                 </Expander>
                 <Label HorizontalAlignment="Right" FontSize="12 px" TabIndex="22">
                     <Hyperlink NavigateUri="https://github.com/uberhalit/EldenRingFpsUnlockAndMore" RequestNavigate="Hyperlink_RequestNavigate">
-                        v0.0.1-beta - by uberhalit
+                        v0.0.0.2-beta - by uberhalit
                     </Hyperlink>
                 </Label>
             </StackPanel>

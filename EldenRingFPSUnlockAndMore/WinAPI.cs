@@ -25,7 +25,7 @@ namespace EldenRingFPSUnlockAndMore
             out IntPtr lpNumberOfBytesRead);
 
         [DllImport("kernel32.dll", SetLastError = true)]
-        internal static extern bool WriteProcessMemory(
+        internal static extern Boolean WriteProcessMemory(
             IntPtr hProcess,
             Int64 lpBaseAddress,
             [In, Out] Byte[] lpBuffer,

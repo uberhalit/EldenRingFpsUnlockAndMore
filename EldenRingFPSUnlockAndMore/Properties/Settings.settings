@@ -5,5 +5,11 @@
     <Setting Name="FrameLock" Type="System.String" Scope="User">
       <Value Profile="(Default)">144</Value>
     </Setting>
+    <Setting Name="GamePath" Type="System.String" Scope="User">
+      <Value Profile="(Default)">C:\Program Files (x86)\Steam\steamapps\common\ELDEN RING\Game</Value>
+    </Setting>
+    <Setting Name="FrameLockTicked" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">False</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

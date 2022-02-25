@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Diagnostics;
-using System.Runtime.CompilerServices;
 
 namespace EldenRingFPSUnlockAndMore
 {
@@ -9,7 +8,7 @@ namespace EldenRingFPSUnlockAndMore
     /// I AM FORCED TO USE STUPID ASS .NET 4.8 HERE CAUSE WINDOWS DOESN'T INSTALL THE LATEST .NET 6 BY DEFAULT
     /// https://github.com/uberhalit/PatternScanBench/blob/master/PatternScanBench/Implementations/PatternScanLazySIMD.cs
     /// </summary>
-    internal class PatternScan
+    internal class PatternScan : IDisposable
     {
         private static long dwStart = 0;
         private static byte[] bData;
@@ -40,7 +39,10 @@ namespace EldenRingFPSUnlockAndMore
             }
         }
 
-        ~PatternScan()
+        /// <summary>
+        /// Clean up all objects.
+        /// </summary>
+        public void Dispose()
         {
             bData = null;
             GC.Collect();
@@ -147,7 +149,7 @@ namespace EldenRingFPSUnlockAndMore
         //} 
 
         /// <summary>
-        /// Returns address of pattern using 'BytePointerWithJIT' implementation by M i c h a e l. Can match 0.
+        /// Returns address of pattern using ASS-SLOW (thx microsoft) 'NaiveFor' implementation. Can match 0.
         /// </summary>
         /// <param name="cbMemory">The byte array to scan.</param>
         /// <param name="cbPattern">The byte pattern to look for, wildcard positions are replaced by 0.</param>
@@ -155,32 +157,24 @@ namespace EldenRingFPSUnlockAndMore
         /// <returns>-1 if pattern is not found.</returns>
         private static long FindPattern_Native(ref byte[] cbMemory, ref byte[] cbPattern, string szMask)
         {
-            int maskLength = szMask.Length;
-            int search_len = cbMemory.Length;
-            ref byte region_it = ref cbMemory[0];
-            ref byte pattern = ref cbPattern[0];
+            long ix;
+            int iy;
+            bool bFound = false;
+            int dataLength = cbMemory.Length - cbPattern.Length;
 
-            for (int i = 0; i < search_len; ++i, region_it = ref Unsafe.Add(ref region_it, 1))
+            for (ix = 0; ix < dataLength; ix++)
             {
-                if (region_it == pattern)
+                bFound = true;
+                for (iy = cbPattern.Length - 1; iy > -1; iy--)
                 {
-                    ref byte pattern_it = ref pattern;
-                    ref byte memory_it = ref region_it;
-                    bool found = true;
-
-                    for (int j = 0; j < maskLength && (i + j) < search_len; ++j, memory_it = ref Unsafe.Add(ref memory_it, 1), pattern_it = ref Unsafe.Add(ref pattern_it, 1))
-                    {
-                        if (szMask[j] != 'x') continue;
-                        if (memory_it != pattern_it)
-                        {
-                            found = false;
-                            break;
-                        }
-                    }
-
-                    if (found)
-                        return dwStart + i;
+                    if (szMask[iy] != 'x' || cbPattern[iy] == cbMemory[ix + iy])
+                        continue;
+                    bFound = false;
+                    break;
                 }
+
+                if (bFound)
+                    return dwStart + ix;
             }
 
             return -1;

@@ -34,5 +34,29 @@ namespace EldenRingFPSUnlockAndMore.Properties {
                 this["FrameLock"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("C:\\Program Files (x86)\\Steam\\steamapps\\common\\ELDEN RING\\Game")]
+        public string GamePath {
+            get {
+                return ((string)(this["GamePath"]));
+            }
+            set {
+                this["GamePath"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool FrameLockTicked {
+            get {
+                return ((bool)(this["FrameLockTicked"]));
+            }
+            set {
+                this["FrameLockTicked"] = value;
+            }
+        }
     }
 }
