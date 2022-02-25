@@ -10,6 +10,7 @@ using Microsoft.Win32;
 using System.Runtime.InteropServices;
 using System.Windows.Threading;
 using System.ComponentModel;
+using System.Linq;
 using System.Management;
 
 namespace EldenRingFPSUnlockAndMore
@@ -86,7 +87,14 @@ namespace EldenRingFPSUnlockAndMore
             {
                 // check if game is running without EAC
                 string procArgs = GetCommandLineOfProcess(procList[0]);
-                ServiceController sc = new ServiceController("EasyAntiCheat");
+                var services = ServiceController.GetServices();
+                var eacServices = services.Where(service => service.ServiceName.Contains("EasyAntiCheat")).ToArray();
+                if (!eacServices.Any())
+                {
+                    return false;
+                }
+                var eacServiceName = eacServices.First().ServiceName;
+                var sc = new ServiceController(eacServiceName);
                 if (string.IsNullOrEmpty(procArgs) || !procArgs.Contains("-noeac") || 
                     sc.Status == ServiceControllerStatus.Running || sc.Status == ServiceControllerStatus.ContinuePending || sc.Status == ServiceControllerStatus.StartPending ||
                     !File.Exists(Path.Combine(Path.GetDirectoryName(procList[0].MainModule.FileName), "steam_appid.txt")))

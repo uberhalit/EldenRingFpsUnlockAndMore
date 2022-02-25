@@ -12,7 +12,7 @@
         <DockPanel>
             <StackPanel DockPanel.Dock="Top" Margin="10,10,10,0" Width="300" Height="Auto">
                 <DockPanel LastChildFill="False">
-                    <CheckBox x:Name="cbFramelock" DockPanel.Dock="Left" Margin="0,0,0,0" Height="25" FontSize="14 px" VerticalContentAlignment="Center" Content="Frame rate lock:" ToolTip="Make sure to read the guide" IsChecked="{Binding Source={x:Static p:Settings.Default}, Path=FrameLockTicked, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" TabIndex="1" />
+                    <CheckBox x:Name="cbFramelock" DockPanel.Dock="Left" Margin="0,0,0,0" Height="25" FontSize="14 px" VerticalContentAlignment="Center" Content="Frame rate lock:" ToolTip="Make sure to read the guide" IsChecked="{Binding Source={x:Static p:Settings.Default}, Path=FrameLockTicked, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" TabIndex="1" IsEnabled="False" />
                     <TextBox x:Name="tbFramelock" DockPanel.Dock="Right" Margin="0,0,0,0" Width="116" Height="25" FontSize="14 px" VerticalContentAlignment="Center" Text="{Binding Source={x:Static p:Settings.Default}, Path=FrameLock, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" MaxLength="3" TabIndex="2" />
                 </DockPanel>
                 <Button x:Name="bStart" Margin="0,7,0,0" Width="300" Height="30" FontSize="14 px" IsEnabled="False" Content="Start game" BorderThickness="1" Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}" 
