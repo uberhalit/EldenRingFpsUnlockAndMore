@@ -82,66 +82,71 @@ namespace EldenRingFPSUnlockAndMore
         private async Task<bool> CheckGame()
         {
             // check for game
-            Process[] procList = Process.GetProcessesByName(GameData.PROCESS_NAME);
-            if (procList.Length > 0)
+            var procList = Process.GetProcessesByName(GameData.PROCESS_NAME);
+            if (!procList.Any()) return false;
+            // check if game is running without EAC
+            var procArgs = GetCommandLineOfProcess(procList[0]);
+            var services = ServiceController.GetServices();
+            var eacServices = services.Where(service => service.ServiceName.Contains("EasyAntiCheat")).ToArray();
+            var eacRunning = false;
+            ServiceController sc = null; 
+            foreach (var eacService in eacServices)
             {
-                // check if game is running without EAC
-                string procArgs = GetCommandLineOfProcess(procList[0]);
-                var services = ServiceController.GetServices();
-                var eacServices = services.Where(service => service.ServiceName.Contains("EasyAntiCheat")).ToArray();
-                if (!eacServices.Any())
+                sc = new ServiceController(eacService.ServiceName);
+                eacRunning = sc.Status == ServiceControllerStatus.Running ||
+                             sc.Status == ServiceControllerStatus.ContinuePending ||
+                             sc.Status == ServiceControllerStatus.StartPending;
+                if (eacRunning)
                 {
-                    return false;
+                    break;
                 }
-                var eacServiceName = eacServices.First().ServiceName;
-                var sc = new ServiceController(eacServiceName);
-                if (string.IsNullOrEmpty(procArgs) || !procArgs.Contains("-noeac") || 
-                    sc.Status == ServiceControllerStatus.Running || sc.Status == ServiceControllerStatus.ContinuePending || sc.Status == ServiceControllerStatus.StartPending ||
-                    !File.Exists(Path.Combine(Path.GetDirectoryName(procList[0].MainModule.FileName), "steam_appid.txt")))
+            }
+                
+            if (string.IsNullOrEmpty(procArgs) || !procArgs.Contains("-noeac") || eacRunning || sc == null ||
+                !File.Exists(Path.Combine(Path.GetDirectoryName(procList[0].MainModule.FileName), "steam_appid.txt")))
+            {
+                // if not prompt the user
+                MessageBoxResult result = MessageBox.Show("Game is already running!\n\n" +
+                                                          "Do you want to close and restart it in offline mode without EAC?\n\n", "Elden Ring FPS Unlocker and more", MessageBoxButton.YesNoCancel, MessageBoxImage.Warning);
+                switch (result)
                 {
-                    // if not prompt the user
-                    MessageBoxResult result = MessageBox.Show("Game is already running!\n\n" +
-                                                              "Do you want to close and restart it in offline mode without EAC?\n\n", "Elden Ring FPS Unlocker and more", MessageBoxButton.YesNoCancel, MessageBoxImage.Warning);
-                    if (result == MessageBoxResult.Cancel)
+                    case MessageBoxResult.Cancel:
                         return false;
-                    if (result == MessageBoxResult.No)
-                    {
+                    case MessageBoxResult.No:
                         return OpenGame();
-                    }
-                    else if (result == MessageBoxResult.Yes)
+                    case MessageBoxResult.Yes:
                     {
-                        string filePath = Path.GetDirectoryName(procList[0].MainModule.FileName);
-                        foreach (Process proc in procList)
+                        var filePath = Path.GetDirectoryName(procList[0].MainModule.FileName);
+                        foreach (var proc in procList)
                         {
                             proc.Kill();
                             proc.WaitForExit(3000);
                             proc.Close();
                         }
                         await Task.Delay(1000);
-                        sc = new ServiceController("EasyAntiCheat");
-                        if (sc.Status != ServiceControllerStatus.Stopped && sc.Status != ServiceControllerStatus.StopPending)
+                        if (sc != null && sc.Status != ServiceControllerStatus.Stopped && sc.Status != ServiceControllerStatus.StopPending)
                             sc.Stop();
                         await Task.Delay(2000);
                         await SafeStartGame(filePath);
                         return OpenGame();
                     }
                 }
-                else
+            }
+            else
+            {
+                if (_gameProc != null && _gameProc.Id == procList[0].Id)
                 {
-                    if (_gameProc != null && _gameProc.Id == procList[0].Id)
-                    {
-                        MessageBox.Show("Game is already running without EAC!", "Elden Ring FPS Unlocker and more", MessageBoxButton.OK, MessageBoxImage.Information);
-                        return true;
-                    }
-                    if (!procList[0].Responding)
-                        await Task.Delay(5000);
-                    if (procList[0].HasExited)
-                    {
-                        await Task.Delay(2500);
-                        return false;
-                    }
-                    return OpenGame();
+                    MessageBox.Show("Game is already running without EAC!", "Elden Ring FPS Unlocker and more", MessageBoxButton.OK, MessageBoxImage.Information);
+                    return true;
                 }
+                if (!procList[0].Responding)
+                    await Task.Delay(5000);
+                if (procList[0].HasExited)
+                {
+                    await Task.Delay(2500);
+                    return false;
+                }
+                return OpenGame();
             }
             return false;
         }
