@@ -12,6 +12,7 @@ using System.Windows.Threading;
 using System.ComponentModel;
 using System.Linq;
 using System.Management;
+using System.Text.RegularExpressions;
 
 namespace EldenRingFPSUnlockAndMore
 {
@@ -385,6 +386,8 @@ namespace EldenRingFPSUnlockAndMore
         {
             string displayName;
             string installDir;
+
+
             RegistryKey key;
 
             // search in: CurrentUser
@@ -393,16 +396,13 @@ namespace EldenRingFPSUnlockAndMore
             {
                 RegistryKey subkey = key.OpenSubKey(keyName);
                 displayName = subkey?.GetValue("DisplayName") as string;
+
                 if (displayName != null)
                 {
-                    if (p_name.Equals(displayName, StringComparison.OrdinalIgnoreCase) == true)
-                    {
-                        installDir = subkey.GetValue("InstallLocation") as string;
-                        if (!string.IsNullOrEmpty(installDir))
-                            return installDir;
-                    }
+                    if (InstallDirCheck(displayName, p_name, subkey, out installDir))
+                        return installDir;
                 }
-                
+
             }
 
             // search in: LocalMachine_32
@@ -411,14 +411,11 @@ namespace EldenRingFPSUnlockAndMore
             {
                 RegistryKey subkey = key.OpenSubKey(keyName);
                 displayName = subkey?.GetValue("DisplayName") as string;
+
                 if (displayName != null)
                 {
-                    if (p_name.Equals(displayName, StringComparison.OrdinalIgnoreCase) == true)
-                    {
-                        installDir = subkey.GetValue("InstallLocation") as string;
-                        if (!string.IsNullOrEmpty(installDir))
-                            return installDir;
-                    }
+                    if (InstallDirCheck(displayName, p_name, subkey, out installDir))
+                        return installDir;
                 }
             }
 
@@ -428,19 +425,51 @@ namespace EldenRingFPSUnlockAndMore
             {
                 RegistryKey subkey = key.OpenSubKey(keyName);
                 displayName = subkey?.GetValue("DisplayName") as string;
+
                 if (displayName != null)
                 {
-                    if (p_name.Equals(displayName, StringComparison.OrdinalIgnoreCase) == true)
-                    {
-                        installDir = subkey.GetValue("InstallLocation") as string;
-                        if (!string.IsNullOrEmpty(installDir))
-                            return installDir;
-                    }
-                }   
+                    if (InstallDirCheck(displayName, p_name, subkey, out installDir))
+                        return installDir;
+                }
             }
 
             // NOT FOUND
             return null;
+        }
+
+        /// <summary>
+        /// Check if installDir is valid
+        /// </summary>
+        /// <param name="displayName"></param>
+        /// <param name="p_name"></param>
+        /// <param name="subkey"></param>
+        /// <param name="installDir"></param>
+        /// <returns>True if valid</returns>
+        private static bool InstallDirCheck(string displayName, string p_name, RegistryKey subkey, out string installDir)
+        {
+            const string RegexNotASCII = @"[^\x00-\x80]+";
+            installDir = string.Empty;
+
+            // Check for non-English characters in displayName (CN, KR, ...) 
+            if (Regex.IsMatch(displayName, RegexNotASCII))
+            {
+                // check if InstallLocation path contains ELDEN RING sind displayName contains non-standard characters 
+                installDir = subkey.GetValue("InstallLocation") as string;
+                if (installDir != null && installDir.Contains(p_name))
+                {
+                    // Not needed but just an additional check to see if eldenring.exe is in the InstallLocation path
+                    if (File.Exists(installDir + @"\Game\eldenring.exe"))
+                        return true;
+                }
+            }
+            else if (p_name.Equals(displayName, StringComparison.OrdinalIgnoreCase))
+            {
+                installDir = subkey.GetValue("InstallLocation") as string;
+                if (!string.IsNullOrEmpty(installDir))
+                    return true;
+            }
+
+            return false;
         }
 
         /// <summary>
