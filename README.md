@@ -1,4 +1,4 @@
-# EXPERIMENTAL! NOT JET TESTED MUCH
+# EXPERIMENTAL! NOT YET TESTED MUCH
 Please makse sure your game is set to offline and you start the game without EAC through the utility.
 
 # Elden Ring FPS Unlocker and more
