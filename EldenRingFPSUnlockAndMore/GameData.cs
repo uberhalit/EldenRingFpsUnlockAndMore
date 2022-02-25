@@ -24,5 +24,7 @@ namespace EldenRingFPSUnlockAndMore
          */
         internal const string PATTERN_FRAMELOCK = "C7 ?? ?? ?? 88 88 3C EB"; // first byte can can be 88/90 instead of 89 due to precision loss on floating point numbers
         internal const int PATTERN_FRAMELOCK_OFFSET = 3; // offset to byte array from found position
+        internal const string PATTERN_FRAMELOCK_FUZZY = "89 73 ?? C7 ?? ?? ?? ?? ?? ?? EB ?? 89 73";
+        internal const int PATTERN_FRAMELOCK_OFFSET_FUZZY = 6;
     }
 }

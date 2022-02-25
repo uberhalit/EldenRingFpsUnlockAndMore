@@ -1,5 +1,5 @@
 # EXPERIMENTAL! NOT YET TESTED MUCH
-Please makse sure your game is set to offline and you start the game without EAC through the utility.
+Please make sure your game is set to offline and you start the game without EAC through the utility.
 
 # Elden Ring FPS Unlocker and more
 
@@ -118,5 +118,11 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 * if your monitor does not support Hz override (Preferred Refreshrate missing and Profile Inspector won't work either) you won't be able to play at a higher refresh rate in fullscreen, play in windowed mode as an alternative
 
 ## Version History
+* v0.0.0.2-beta (2022-02-25)
+  * added game checks
+  * fixed broken game start
+  * added prompt to select game installation path
+  * removed reference to external MS DLL
+  * multiple fixes
 * v0.0.0.1-beta (2022-02-25)
   * Initial release
