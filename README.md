@@ -110,6 +110,7 @@ Feel free to open an issue or create a pull request at any time
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details
 
 ## Credits
+* [Darius Dan](http://www.dariusdan.com) for the icon
 
 ## Limitations
 
@@ -124,5 +125,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
   * added prompt to select game installation path
   * removed reference to external MS DLL
   * multiple fixes
+  * added icon
 * v0.0.0.1-beta (2022-02-25)
   * Initial release

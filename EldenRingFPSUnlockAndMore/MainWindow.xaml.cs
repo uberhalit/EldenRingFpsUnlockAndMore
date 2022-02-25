@@ -379,13 +379,17 @@ namespace EldenRingFPSUnlockAndMore
             foreach (string keyName in key.GetSubKeyNames())
             {
                 RegistryKey subkey = key.OpenSubKey(keyName);
-                displayName = subkey.GetValue("DisplayName") as string;
-                if (p_name.Equals(displayName, StringComparison.OrdinalIgnoreCase) == true)
+                displayName = subkey?.GetValue("DisplayName") as string;
+                if (displayName != null)
                 {
-                    installDir = subkey.GetValue("InstallLocation") as string;
-                    if (!string.IsNullOrEmpty(installDir))
-                        return installDir;
+                    if (p_name.Equals(displayName, StringComparison.OrdinalIgnoreCase) == true)
+                    {
+                        installDir = subkey.GetValue("InstallLocation") as string;
+                        if (!string.IsNullOrEmpty(installDir))
+                            return installDir;
+                    }
                 }
+                
             }
 
             // search in: LocalMachine_32
@@ -393,12 +397,15 @@ namespace EldenRingFPSUnlockAndMore
             foreach (string keyName in key.GetSubKeyNames())
             {
                 RegistryKey subkey = key.OpenSubKey(keyName);
-                displayName = subkey.GetValue("DisplayName") as string;
-                if (p_name.Equals(displayName, StringComparison.OrdinalIgnoreCase) == true)
+                displayName = subkey?.GetValue("DisplayName") as string;
+                if (displayName != null)
                 {
-                    installDir = subkey.GetValue("InstallLocation") as string;
-                    if (!string.IsNullOrEmpty(installDir))
-                        return installDir;
+                    if (p_name.Equals(displayName, StringComparison.OrdinalIgnoreCase) == true)
+                    {
+                        installDir = subkey.GetValue("InstallLocation") as string;
+                        if (!string.IsNullOrEmpty(installDir))
+                            return installDir;
+                    }
                 }
             }
 
@@ -407,13 +414,16 @@ namespace EldenRingFPSUnlockAndMore
             foreach (string keyName in key.GetSubKeyNames())
             {
                 RegistryKey subkey = key.OpenSubKey(keyName);
-                displayName = subkey.GetValue("DisplayName") as string;
-                if (p_name.Equals(displayName, StringComparison.OrdinalIgnoreCase) == true)
+                displayName = subkey?.GetValue("DisplayName") as string;
+                if (displayName != null)
                 {
-                    installDir = subkey.GetValue("InstallLocation") as string;
-                    if (!string.IsNullOrEmpty(installDir))
-                        return installDir;
-                }
+                    if (p_name.Equals(displayName, StringComparison.OrdinalIgnoreCase) == true)
+                    {
+                        installDir = subkey.GetValue("InstallLocation") as string;
+                        if (!string.IsNullOrEmpty(installDir))
+                            return installDir;
+                    }
+                }   
             }
 
             // NOT FOUND
