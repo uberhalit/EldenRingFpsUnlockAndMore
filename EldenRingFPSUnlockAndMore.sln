@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.32002.185
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EldenRingFPSUnlockAndMore", "EldenRingFPSUnlockAndMore\EldenRingFPSUnlockAndMore.csproj", "{6EBC3243-9951-41C3-A843-8E1A91A45065}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+		Release|x64 = Release|x64
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{6EBC3243-9951-41C3-A843-8E1A91A45065}.Debug|x64.ActiveCfg = Debug|x64
+		{6EBC3243-9951-41C3-A843-8E1A91A45065}.Debug|x64.Build.0 = Debug|x64
+		{6EBC3243-9951-41C3-A843-8E1A91A45065}.Release|x64.ActiveCfg = Release|x64
+		{6EBC3243-9951-41C3-A843-8E1A91A45065}.Release|x64.Build.0 = Release|x64
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {221B2DCE-0526-4890-A54B-F37E620B38F7}
+	EndGlobalSection
+EndGlobal

@@ -1,0 +1,45 @@
+﻿<Window x:Class="EldenRingFPSUnlockAndMore.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:EldenRingFPSUnlockAndMore"
+        xmlns:p="clr-namespace:EldenRingFPSUnlockAndMore.Properties" 
+        mc:Ignorable="d"
+        Title="Elden Ring FPS Unlocker and more" Width="Auto" Height="Auto" SizeToContent="WidthAndHeight" ResizeMode="CanMinimize" Loaded="Window_Loaded" Closing="Window_Closing" >
+    
+    <Grid x:Name="gMainGrid" Background="#FFF9F9F9">
+        <DockPanel>
+            <StackPanel DockPanel.Dock="Top" Margin="10,10,10,0" Width="300" Height="Auto">
+                <DockPanel LastChildFill="False">
+                    <CheckBox x:Name="cbFramelock" DockPanel.Dock="Left" Margin="0,0,0,0" Height="25" FontSize="14 px" VerticalContentAlignment="Center" Content="Frame rate lock:" ToolTip="Make sure to read the guide" IsChecked="False" IsEnabled="False" TabIndex="1" />
+                    <TextBox x:Name="tbFramelock" DockPanel.Dock="Right" Margin="0,0,0,0" Width="116" Height="25" FontSize="14 px" VerticalContentAlignment="Center" Text="{Binding Source={x:Static p:Settings.Default}, Path=FrameLock, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" MaxLength="3" TabIndex="2" />
+                </DockPanel>
+                <Button x:Name="bStart" Margin="0,7,0,0" Width="300" Height="30" FontSize="14 px" IsEnabled="True" Content="Start game" BorderThickness="1" Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}" 
+                    Focusable="False" TabIndex="20" IsTabStop="False" />
+                <Button x:Name="bPatch" Margin="0,7,0,0" Width="300" Height="30" FontSize="14 px" IsEnabled="False" Content="Patch game" BorderThickness="1" Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}" 
+                    Focusable="False" TabIndex="20" IsTabStop="False" Click="bPatch_Click" />
+                <TextBox x:Name="tbStatus" Margin="0,5,0,0" Width="300" Height="25" FontSize="14 px" FontWeight="Bold" Text="waiting for game..." TextAlignment="Center" TextWrapping="NoWrap" IsEnabled="False" />
+                <Expander x:Name="exGuide" Margin="0,8,0,0" Height="Auto" FontSize="14 px" Header="ReadMe" IsExpanded="True" TabIndex="22">
+                    <TextBlock Margin="2,6,2,0" FontSize="11 px" TextWrapping="WrapWithOverflow" IsEnabled="False">
+                        <TextBlock.Inlines>
+                            <Run FontWeight="Bold" Foreground="#FFF00000">DON'T RUN THIS IN ONLINE MODE OR WITH EAC ENABLED!</Run>
+                            <Run FontWeight="Bold" Foreground="#FF0046FF">This patcher does not modify game files, you have to start it every time.</Run>
+                            <Run FontWeight="Bold">If your monitor is 60 Hz you will have to use</Run>
+                            <Run FontWeight="Bold" Foreground="#FFF00000">fullscreen mode and force disable VSYNC</Run>
+                            <Run FontWeight="Bold">with Nvidia Control panel or AMD Radeon Settings to get frame rate unlock working.</Run>
+                            <Run FontWeight="Bold">If your monitor is >60 Hz you will have to use</Run>
+                            <Run FontWeight="Bold" Foreground="#FFF00000">borderless window mode or force the game to run on highest available refresh rate</Run>
+                            <Run FontWeight="Bold">using Nvidia Control panel or AMD Radeon Settings.</Run>
+                        </TextBlock.Inlines>
+                    </TextBlock>
+                </Expander>
+                <Label HorizontalAlignment="Right" FontSize="12 px" TabIndex="22">
+                    <Hyperlink NavigateUri="https://github.com/uberhalit/EldenRingFpsUnlockAndMore" RequestNavigate="Hyperlink_RequestNavigate">
+                        v0.0.1 - by uberhalit
+                    </Hyperlink>
+                </Label>
+            </StackPanel>
+        </DockPanel>
+    </Grid>
+</Window>
