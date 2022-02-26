@@ -58,5 +58,29 @@ namespace EldenRingFPSUnlockAndMore.Properties {
                 this["FrameLockTicked"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("25")]
+        public string Fov {
+            get {
+                return ((string)(this["Fov"]));
+            }
+            set {
+                this["Fov"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool FovTicked {
+            get {
+                return ((bool)(this["FovTicked"]));
+            }
+            set {
+                this["FovTicked"] = value;
+            }
+        }
     }
 }

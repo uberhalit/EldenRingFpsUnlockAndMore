@@ -19,6 +19,7 @@ namespace EldenRingFPSUnlockAndMore
     public partial class MainWindow : Window
     {
         internal long _offset_framelock = 0x0;
+        internal long _offset_fovtable = 0x0;
 
         internal static string _path_logs;
         internal Process _gameProc;
@@ -84,11 +85,12 @@ namespace EldenRingFPSUnlockAndMore
         {
             // check for game
             var procList = Process.GetProcessesByName(GameData.PROCESS_NAME);
-            if (!procList.Any()) return false;
+            if (!procList.Any()) 
+                return false;
+
             // check if game is running without EAC
             var procArgs = GetCommandLineOfProcess(procList[0]);
-            var services = ServiceController.GetServices();
-            var eacServices = services.Where(service => service.ServiceName.Contains("EasyAntiCheat")).ToArray();
+            var eacServices = ServiceController.GetServices().Where(service => service.ServiceName.Contains("EasyAntiCheat")).ToArray();
             var eacRunning = false;
             ServiceController sc = null; 
             foreach (var eacService in eacServices)
@@ -103,8 +105,7 @@ namespace EldenRingFPSUnlockAndMore
                 }
             }
                 
-            if (string.IsNullOrEmpty(procArgs) || !procArgs.Contains("-noeac") || eacRunning || sc == null ||
-                !File.Exists(Path.Combine(Path.GetDirectoryName(procList[0].MainModule.FileName), "steam_appid.txt")))
+            if (string.IsNullOrEmpty(procArgs) || !procArgs.Contains("-noeac") || eacRunning || !File.Exists(Path.Combine(Path.GetDirectoryName(procList[0].MainModule.FileName), "steam_appid.txt")))
             {
                 // if not prompt the user
                 MessageBoxResult result = MessageBox.Show("Game is already running!\n\n" +
@@ -147,7 +148,8 @@ namespace EldenRingFPSUnlockAndMore
                     await Task.Delay(2500);
                     return false;
                 }
-                return OpenGame();
+                if (procList[0].Responding && !procList[0].HasExited)
+                    return OpenGame();
             }
             return false;
         }
@@ -311,6 +313,15 @@ namespace EldenRingFPSUnlockAndMore
                     _offset_framelock = 0x0;
             }
 
+            long pFovTable = patternScan.FindPattern(GameData.PATTERN_FOVTABLEPTR) + GameData.PATTERN_FOVTABLEPTR_OFFSET;
+            Debug.WriteLine($"fpFovTable found at: 0x{pFovTable:X}");
+            if (IsValidAddress(pFovTable))
+            {
+                _offset_fovtable = DereferenceRelativeOffset(pFovTable);
+                if (!IsValidAddress(_offset_fovtable))
+                    _offset_fovtable = 0x0;
+            }
+
             patternScan.Dispose();
         }
 
@@ -326,6 +337,13 @@ namespace EldenRingFPSUnlockAndMore
                 cbFramelock.IsEnabled = false;
             }
 
+            if (_offset_fovtable == 0x0)
+            {
+                UpdateStatus("FOV table not found...", Brushes.Red);
+                LogToFile("FOV table not found...");
+                cbFov.IsEnabled = false;
+            }
+
             bPatch.IsEnabled = true;
             PatchGame();
         }
@@ -336,6 +354,8 @@ namespace EldenRingFPSUnlockAndMore
         private void PatchGame()
         {
             PatchFramelock();
+            PatchFov();
+            UpdateStatus("game patched!", Brushes.Green);
         }
 
         /// <summary>
@@ -372,8 +392,38 @@ namespace EldenRingFPSUnlockAndMore
                 float deltaTime = (1000f / 60) / 1000f;
                 WriteBytes(_offset_framelock, BitConverter.GetBytes(deltaTime));
             }
+            return true;
+        }
 
-            UpdateStatus("game patched!", Brushes.Green);
+        /// <summary>
+        /// Patches the game's field of view.
+        /// </summary>
+        private bool PatchFov()
+        {
+            if (!cbFov.IsEnabled || _offset_fovtable == 0x0) return false;
+            if (cbFov.IsChecked == true)
+            {
+                bool isNumber = Int32.TryParse(tbFov.Text, out int fovIncrease);
+                if (fovIncrease < -95 || !isNumber)
+                {
+                    tbFov.Text = "-95";
+                    fovIncrease = -95;
+                }
+                else if (fovIncrease > 95)
+                {
+                    tbFov.Text = "95";
+                    fovIncrease = 95;
+                }
+
+                float fovValue = (float)(Math.PI / 180) * ((fovIncrease / 100.0f) + 1); // convert change in %degree to radians
+                WriteBytes(_offset_fovtable, BitConverter.GetBytes(fovValue));
+            }
+            else if (cbFov.IsChecked == false)
+            {
+                WriteBytes(_offset_fovtable, BitConverter.GetBytes(GameData.PATTERN_FOVTABLEPTR_DISABLE));
+                return false;
+            }
+
             return true;
         }
 
@@ -386,8 +436,6 @@ namespace EldenRingFPSUnlockAndMore
         {
             string displayName;
             string installDir;
-
-
             RegistryKey key;
 
             // search in: CurrentUser
@@ -402,7 +450,6 @@ namespace EldenRingFPSUnlockAndMore
                     if (InstallDirCheck(displayName, p_name, subkey, out installDir))
                         return installDir;
                 }
-
             }
 
             // search in: LocalMachine_32
@@ -438,13 +485,13 @@ namespace EldenRingFPSUnlockAndMore
         }
 
         /// <summary>
-        /// Check if installDir is valid
+        /// Check if installDir of an application is valid.
         /// </summary>
-        /// <param name="displayName"></param>
-        /// <param name="p_name"></param>
-        /// <param name="subkey"></param>
+        /// <param name="displayName">The application install dir.</param>
+        /// <param name="p_name">The apps name.</param>
+        /// <param name="subkey">The registry key.</param>
         /// <param name="installDir"></param>
-        /// <returns>True if valid</returns>
+        /// <returns>True if valid.</returns>
         private static bool InstallDirCheck(string displayName, string p_name, RegistryKey subkey, out string installDir)
         {
             const string RegexNotASCII = @"[^\x00-\x80]+";
@@ -508,6 +555,16 @@ namespace EldenRingFPSUnlockAndMore
         private static bool WriteBytes(Int64 lpBaseAddress, byte[] bytes)
         {
             return WinAPI.WriteProcessMemory(_gameAccessHwndStatic, lpBaseAddress, bytes, (ulong)bytes.Length, out _);
+        }
+
+        /// <summary>
+        /// Reads a compile-time static, relative 4 bytes offset from an instruction and dereferences it.
+        /// </summary>
+        /// <param name="addressToRelativeOffset">The address the offset is located at.</param>
+        /// <returns>The actual, non-relative address the offset points to.</returns>
+        private static Int64 DereferenceRelativeOffset(Int64 addressToRelativeOffset)
+        {
+            return addressToRelativeOffset + Read<Int32>(addressToRelativeOffset) + 0x4;
         }
 
         /// <summary>
@@ -635,6 +692,33 @@ namespace EldenRingFPSUnlockAndMore
             if (!res)
                 await SafeStartGame();
             bStart.IsEnabled = true;
+        }
+
+        private void BFov0_Click(object sender, RoutedEventArgs e)
+        {
+            tbFov.Text = "0";
+            if (cbFov.IsChecked == true) 
+                PatchFov();
+        }
+
+        private void BFovLower_Click(object sender, RoutedEventArgs e)
+        {
+            if (Int32.TryParse(tbFov.Text, out int fov) && fov > -91)
+            {
+                tbFov.Text = (fov - 5).ToString();
+                if (cbFov.IsChecked == true) 
+                    PatchFov();
+            }
+        }
+
+        private void BFovHigher_Click(object sender, RoutedEventArgs e)
+        {
+            if (Int32.TryParse(tbFov.Text, out int fov) && fov < 91)
+            {
+                tbFov.Text = (fov + 5).ToString();
+                if (cbFov.IsChecked == true) 
+                    PatchFov();
+            }
         }
     }
 }

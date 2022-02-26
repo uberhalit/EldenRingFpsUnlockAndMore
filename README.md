@@ -1,9 +1,9 @@
 # EXPERIMENTAL! NOT YET TESTED MUCH
-Please make sure your game is set to offline and you start the game without EAC through the utility.
+Please make sure your game is set to offline and you start the game without EAC through the utility. Don't rename the games exe.
 
 # Elden Ring FPS Unlocker and more
 
-A small utility to remove frame rate limit for [Elden Ring](https://en.bandainamcoent.eu/elden-ring/elden-ring) written in C#. More features soon!
+A small utility to remove frame rate limit and modify FOV (Field of View) for [Elden Ring](https://en.bandainamcoent.eu/elden-ring/elden-ring) written in C#. More features soon!
 Patches games memory while running, does not modify any game files. Works with every game version (legit steam & oh-not-so-legit), should work with all future updates.
 
 ## Download
@@ -15,6 +15,7 @@ Patches games memory while running, does not modify any game files. Works with e
 * does not modify any game files, RAM patches only
 * works with legit, unmodified steam version as well as with unpacked, not-so-legit versions
 * unlock frame rate (remove FPS limit) by setting a new custom limit
+* increase or decrease field of view (FOV)
 
 ## Usage
 
@@ -39,7 +40,7 @@ The game enforces VSYNC and forces 60 Hz in fullscreen even on 144 Hz monitors s
 8. Hit apply and close Nvidia Control Panel
 9. Start `Elden Ring FPS Unlocker and more` and start the game through the first button
 10. Use fullscreen (144 Hz or 60 Hz Monitors) or borderless window mode (144 Hz Monitors)
-11. Set your new refresh rate limit and click `Patch game`
+11. Set your new refresh rate limit, tick the checkbox and click `Patch game`
 
 ### Follow these steps on AMD:
 1. Right click on Desktop -> `Display settings`
@@ -51,7 +52,7 @@ The game enforces VSYNC and forces 60 Hz in fullscreen even on 144 Hz monitors s
 7.  Apply and close Radeon Settings
 8. Start `Elden Ring FPS Unlocker and more` and start the game through the first button
 9. Use fullscreen (144 Hz or 60 Hz Monitors) or borderless window mode (144 Hz Monitors)
-10. Set your new refresh rate limit and click `Patch game`
+10. Set your new refresh rate limit, tick the checkbox and click `Patch game`
 
 ### To play the game with GSYNC do these additional steps (Nvidia):
 1. Under Nvidia Control Panel navigate to `3D Settings -> Manage 3D settings -> Program Settings -> Elden Ring`
@@ -68,7 +69,8 @@ The game enforces VSYNC and forces 60 Hz in fullscreen even on 144 Hz monitors s
 *soon!*
 
 ### To use the FOV changer:
-*soon!*
+1. Set a new FOV value
+2. Tick the checkbox and confirm with `Patch game`
 
 ## Troubleshooting:
 * Utility can't seem to find the game? - Make sure your game exe is called `eldenring.exe`
@@ -119,6 +121,10 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 * if your monitor does not support Hz override (Preferred Refreshrate missing and Profile Inspector won't work either) you won't be able to play at a higher refresh rate in fullscreen, play in windowed mode as an alternative
 
 ## Version History
+* v0.0.0.3-beta (2022-02-25)
+  * added FOV changer
+  * added handling of alternative version of EAC service (thanks to [DubbleClick](https://github.com/DubbleClick))
+  * added handling of non-english characters in installation paths (thanks to [mrdellis](https://github.com/mrdellis))
 * v0.0.0.2-beta (2022-02-25)
   * added game checks
   * fixed broken game start
