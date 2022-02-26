@@ -14,7 +14,7 @@ Patches games memory while running, does not modify any game files. Works with e
 
 * does not modify any game files, RAM patches only
 * works with legit, unmodified steam version as well as with unpacked, not-so-legit versions
-* unlock frame rate (remove FPS limit) by setting a new custom limit
+* unlock frame rate (remove FPS limit) by setting a new custom limit (currently limited to (borderless) window mode)
 * increase or decrease field of view (FOV)
 
 ## Usage
@@ -27,7 +27,7 @@ The game enforces VSYNC and forces 60 Hz in fullscreen even on 144 Hz monitors s
 #### AMD: Use Radeon Settings to set 'Wait for Vertical Refresh' to 'Enhanced Sync' on a Elden Ring profile. Start Elden Ring in windowed mode and switch to fullscreen once ingame. Troubleshoot: see the guide further down below.
 
 #### 60 Hz monitors: disable VSYNC via driver (use 'Enhanced Sync' on AMD) and use fullscreen, see guide below
-#### high refresh rate monitors: use borderless or force monitor to always use highest available refresh rate and then use fullscreen, see guide below
+#### high refresh rate monitors: use borderless and force monitor to always use highest available refresh rate, see guide below
 
 ### Follow these steps on Nvidia:
 1. Open Nvidia Control Panel
@@ -39,7 +39,7 @@ The game enforces VSYNC and forces 60 Hz in fullscreen even on 144 Hz monitors s
 7. **Set `Vertical sync` to `Off`**
 8. Hit apply and close Nvidia Control Panel
 9. Start `Elden Ring FPS Unlocker and more` and start the game through the first button
-10. Use fullscreen (144 Hz or 60 Hz Monitors) or borderless window mode (144 Hz Monitors)
+10. Use borderless window mode for now
 11. Set your new refresh rate limit, tick the checkbox and click `Patch game`
 
 ### Follow these steps on AMD:
@@ -51,7 +51,7 @@ The game enforces VSYNC and forces 60 Hz in fullscreen even on 144 Hz monitors s
 6. **Set `Wait for Vertical Refresh` to `Enhanced Sync`**:
 7.  Apply and close Radeon Settings
 8. Start `Elden Ring FPS Unlocker and more` and start the game through the first button
-9. Use fullscreen (144 Hz or 60 Hz Monitors) or borderless window mode (144 Hz Monitors)
+9. Use borderless window mode for now
 10. Set your new refresh rate limit, tick the checkbox and click `Patch game`
 
 ### To play the game with GSYNC do these additional steps (Nvidia):
@@ -62,8 +62,7 @@ The game enforces VSYNC and forces 60 Hz in fullscreen even on 144 Hz monitors s
 5. Don't forget to Apply and close Nvidia Control Panel
 6. Use a 3rd party frame rate limiter like [RTSS](https://www.guru3d.com/files-details/rtss-rivatuner-statistics-server-download.html) and set a frame rate limit just a few fps below your monitor refresh rate, on a 144Hz Monitor use 138
 7. Start `Elden Ring FPS Unlocker and more` and set FPS lock to your monitors refresh rate
-8. Start the game and set it to Fullscreen
-9. Enjoy perfectly tearing free variable high refresh rates without VSYNC
+8. Start the game and set it to borderless window
 
 ### To add a custom resolution:
 *soon!*
@@ -117,8 +116,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## Limitations
 
 * the game has forced VSYNC so unlocking the frame rate when your monitor has 60Hz will do nothing. You'll have to disable VSYNC in Nvidia Control Panel or AMD Radeon Settings first, see Usage
-* in fullscreen the game forces the monitor to 60 Hz so you'll have to handle this with driver override too, see Usage
-* if your monitor does not support Hz override (Preferred Refreshrate missing and Profile Inspector won't work either) you won't be able to play at a higher refresh rate in fullscreen, play in windowed mode as an alternative
+* in fullscreen the game forces the monitor to 60 Hz and there is currently no known way to bypass this
 
 ## Version History
 * v0.0.0.3-beta (2022-02-25)
