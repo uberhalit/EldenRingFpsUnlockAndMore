@@ -4,9 +4,7 @@ namespace EldenRingFPSUnlockAndMore
 {
     internal class GameData
     {
-        internal const string PROCESS_NAME = "eldenring";
         internal const string PROCESS_TITLE = "Elden Ring";
-        internal const string PROCESS_EXE_VERSION = "1.2.0.0";
         internal static readonly string[] PROCESS_EXE_VERSION_SUPPORTED = new string[1]
         {
             "1.2.0.0"
@@ -27,20 +25,53 @@ namespace EldenRingFPSUnlockAndMore
         internal const string PATTERN_FRAMELOCK_FUZZY = "89 73 ?? C7 ?? ?? ?? ?? ?? ?? EB ?? 89 73";
         internal const int PATTERN_FRAMELOCK_OFFSET_FUZZY = 6;
 
+        /** Game has a function to adjust FOV by a multiplier but the multiplier never changes during ordinary gameplay.
+            00007FF709FD0DF0 | 44:0F28C8                  | movaps xmm9,xmm0                                               |
+            00007FF709FD0DF4 | E8 C7AC9100                | call eldenring.7FF70A8EBAC0                                    |
+            00007FF709FD0DF9 | 80BB 88040000 00           | cmp byte ptr ds:[rbx+488],0                                    | -> code cave jump inject here
+            00007FF709FD0E00 | 44:0F28E0                  | movaps xmm12,xmm0                                              | save FOV multiplier from xmm0 to xmm12 <- jump back here
+            00007FF709FD0E04 | F344:0F1005 7BE2E102       | movss xmm8,dword ptr ds:[7FF70CDEF088]                         |
+            00007FF709FD0E0D | 45:0F57D2                  | xorps xmm10,xmm10                                              | 
+            00007FF709FD0E11 | F345:0F59E7                | mulss xmm12,xmm15                                              |
 
-        /** Reference pointer to FOV table. The fovtable default constant gets used a lot so we need to overwrite the entry in the table itself.
-            FOV is in radians while default is 1.0deg (0.0174533rad), to increase by 25% you'd write 1.25deg (0.0218166rad) as fFov.
-            00007FF6BA8F5208 | E9 858B5600                | jmp eldenring.7FF6BAE5DD92                                     |
-            00007FF6BA8F520D | 0F28F8                     | movaps xmm7,xmm0                                               |
-            00007FF6BA8F5210 | F3:0F593D 249E89FE         | mulss xmm7,dword ptr ds:[7FF6B918F03C]                         | ->FOVtable
-            00007FF6BA8F5218 | 0F2863 10                  | movaps xmm4,xmmword ptr ds:[rbx+10]                            |
-            00007FF6BA8F521C | 0F5C23                     | subps xmm4,xmmword ptr ds:[rbx]                                |
-            00007FF6BA8F521F | 0F28D4                     | movaps xmm2,xmm4                                               |
-
-            00007FF6BA8F5210 (Version 1.2.0.0)
+            00007FF709FD0E00 (Version 1.2.0.0)
          */
-        internal const string PATTERN_FOVTABLEPTR = "E9 ?? ?? ?? ?? 0F ?? ?? F3 ?? ?? ?? ?? ?? ?? ?? 0F ?? ?? ?? 0F ?? ?? 0F";
-        internal const int PATTERN_FOVTABLEPTR_OFFSET = 12;
-        internal const float PATTERN_FOVTABLEPTR_DISABLE = 0.0174533f; // Rad2Deg -> 1°
+        internal const string PATTERN_FOV_MULTIPLIER = "80 BB ?? ?? ?? ?? 00 44 ?? ?? E0 F3 44 ?? ?? ?? ?? ?? ?? ?? 45";
+        internal const int PATTERN_FOV_MULTIPLIER_OFFSET = 0;
+        internal const int INJECT_FOV_MULTIPLIER_OVERWRITE_LENGTH = 7;
+        internal static readonly byte[] INJECT_FOV_MULTIPLIER_SHELLCODE = new byte[]
+        {
+            0xF3, 0x0F, 0x59, 0x05, 0x00, 0x00, 0x00, 0x00  // mulss xmm0,dword ptr ds:[XXXXXXXXXXXX]
+        };
+        internal const int INJECT_FOV_MULTIPLIER_SHELLCODE_OFFSET = 4;
+
+        /**
+            Here Runes get reduced in case of death, so we nop the two instructions.
+            00007FF70A1FC554 | 44:896C24 2C               | mov dword ptr ss:[rsp+2C],r13d                                 |
+            00007FF70A1FC559 | 8B00                       | mov eax,dword ptr ds:[rax]                                     | prepare reduction amount
+            00007FF70A1FC55B | 8945 6C                    | mov dword ptr ss:[rbp+6C],eax                                  | reduces player runes
+            00007FF70A1FC55E | 48:8B0D 53646703           | mov rcx,qword ptr ds:[7FF70D8729B8]                            |
+            00007FF70A1FC565 | 48:85C9                    | test rcx,rcx                                                   |
+
+            00007FF70A1FC559 (Version 1.2.0.0)
+         */
+        internal const string PATTERN_DEATHPENALTY = "44 ?? ?? ?? ?? 8B 00 89 45 ?? 48 8B 0D";
+        internal const int PATTERN_DEATHPENALTY_OFFSET = 5;
+        internal const int PATCH_DEATHPENALTY_INSTRUCTION_LENGTH = 5;
+        internal static readonly byte[] PATCH_DEATHPENALTY_ENABLE = new byte[] { 0x90, 0x90, 0x90, 0x90, 0x90 }; // nop
+
+        /**
+            Reference pointer pTimeRelated to TimescaleManager pointer, offset in struct to <float>fTimescale which acts as a global speed scale for almost all ingame calculations.
+            00007FF70A98B95A | E8 B1190A01                | call eldenring.7FF70BA2D310                                    |
+            00007FF70A98B95F | 48:8B05 F2737003           | mov rax,qword ptr ds:[7FF70E092D58]                            | pTimeRelated->[TimescaleManager+0x2D4]->fTimescale
+            00007FF70A98B966 | F3:0F1088 D4020000         | movss xmm1,dword ptr ds:[rax+2D4]                              | offset TimescaleManager->fTimescale
+            00007FF70A98B96E | F3:0F5988 70020000         | mulss xmm1,dword ptr ds:[rax+270]                              |
+            00007FF70A98B976 | 48:8D1D DBE3B901           | lea rbx,qword ptr ds:[7FF70C529D58]                            |
+
+            00007FF70A98B95F (Version 1.2.0.0)
+         */
+        internal const string PATTERN_TIMESCALE = "48 8B 05 ?? ?? ?? ?? F3 0F 10 88 ?? ?? ?? ?? F3 0F";
+        internal const int PATTERN_TIMESCALE_OFFSET = 3;
+        internal const int PATTERN_TIMESCALE_POINTER_OFFSET = 8;
     }
 }

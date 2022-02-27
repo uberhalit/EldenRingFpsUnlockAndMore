@@ -17,5 +17,17 @@
     <Setting Name="FovTicked" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
     </Setting>
+    <Setting Name="GameSpeed" Type="System.String" Scope="User">
+      <Value Profile="(Default)">100</Value>
+    </Setting>
+    <Setting Name="GameSpeedTicked" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">False</Value>
+    </Setting>
+    <Setting Name="DisablePenaltyTicked" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">False</Value>
+    </Setting>
+    <Setting Name="GameName" Type="System.String" Scope="User">
+      <Value Profile="(Default)">eldenring</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

@@ -82,5 +82,53 @@ namespace EldenRingFPSUnlockAndMore.Properties {
                 this["FovTicked"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("100")]
+        public string GameSpeed {
+            get {
+                return ((string)(this["GameSpeed"]));
+            }
+            set {
+                this["GameSpeed"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool GameSpeedTicked {
+            get {
+                return ((bool)(this["GameSpeedTicked"]));
+            }
+            set {
+                this["GameSpeedTicked"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool DisablePenaltyTicked {
+            get {
+                return ((bool)(this["DisablePenaltyTicked"]));
+            }
+            set {
+                this["DisablePenaltyTicked"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("eldenring")]
+        public string GameName {
+            get {
+                return ((string)(this["GameName"]));
+            }
+            set {
+                this["GameName"] = value;
+            }
+        }
     }
 }

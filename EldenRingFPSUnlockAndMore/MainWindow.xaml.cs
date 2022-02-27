@@ -19,7 +19,15 @@ namespace EldenRingFPSUnlockAndMore
     public partial class MainWindow : Window
     {
         internal long _offset_framelock = 0x0;
-        internal long _offset_fovtable = 0x0;
+        internal long _offset_fovmultiplier = 0x0;
+        internal long _offset_deathpenalty = 0x0;
+        internal long _offset_timescale = 0x0;
+
+        internal byte[] _patch_deathpenalty_disable;
+
+        internal bool _codeCave_fovmultiplier = false;
+        internal const string _DATACAVE_FOV_MULTIPLIER = "dfovMultiplier";
+        internal const string _CODECAVE_FOV_MULTIPLIER = "cfovMultiplier";
 
         internal static string _path_logs;
         internal Process _gameProc;
@@ -27,9 +35,10 @@ namespace EldenRingFPSUnlockAndMore
         internal IntPtr _gameAccessHwnd = IntPtr.Zero;
         internal static IntPtr _gameAccessHwndStatic;
         internal static bool _startup = true;
+        internal static bool _running = false;
 
+        internal MemoryCaveGenerator _memoryCaveGenerator;
         internal readonly DispatcherTimer _dispatcherTimerGameCheck = new DispatcherTimer();
-        internal readonly DispatcherTimer _dispatcherTimerFreezeMem = new DispatcherTimer();
         internal readonly BackgroundWorker _bgwScanGame = new BackgroundWorker();
 
         public MainWindow()
@@ -84,12 +93,12 @@ namespace EldenRingFPSUnlockAndMore
         private async Task<bool> CheckGame()
         {
             // check for game
-            var procList = Process.GetProcessesByName(GameData.PROCESS_NAME);
-            if (!procList.Any()) 
+            var procList = Process.GetProcessesByName(Properties.Settings.Default.GameName);
+            if (!procList.Any() || procList[0].HasExited) 
                 return false;
 
             // check if game is running without EAC
-            var procArgs = GetCommandLineOfProcess(procList[0]);
+            //var procArgs = GetCommandLineOfProcess(procList[0]);
             var eacServices = ServiceController.GetServices().Where(service => service.ServiceName.Contains("EasyAntiCheat")).ToArray();
             var eacRunning = false;
             ServiceController sc = null; 
@@ -105,7 +114,7 @@ namespace EldenRingFPSUnlockAndMore
                 }
             }
                 
-            if (string.IsNullOrEmpty(procArgs) || !procArgs.Contains("-noeac") || eacRunning || !File.Exists(Path.Combine(Path.GetDirectoryName(procList[0].MainModule.FileName), "steam_appid.txt")))
+            if (eacRunning || !File.Exists(Path.Combine(Path.GetDirectoryName(procList[0].MainModule.FileName), "steam_appid.txt")))
             {
                 // if not prompt the user
                 MessageBoxResult result = MessageBox.Show("Game is already running!\n\n" +
@@ -115,7 +124,7 @@ namespace EldenRingFPSUnlockAndMore
                     case MessageBoxResult.Cancel:
                         return false;
                     case MessageBoxResult.No:
-                        return OpenGame();
+                        return await OpenGame();
                     case MessageBoxResult.Yes:
                     {
                         var filePath = Path.GetDirectoryName(procList[0].MainModule.FileName);
@@ -130,7 +139,7 @@ namespace EldenRingFPSUnlockAndMore
                             sc.Stop();
                         await Task.Delay(2000);
                         await SafeStartGame(filePath);
-                        return OpenGame();
+                        return await OpenGame();
                     }
                 }
             }
@@ -149,7 +158,7 @@ namespace EldenRingFPSUnlockAndMore
                     return false;
                 }
                 if (procList[0].Responding && !procList[0].HasExited)
-                    return OpenGame();
+                    return await OpenGame();
             }
             return false;
         }
@@ -162,9 +171,10 @@ namespace EldenRingFPSUnlockAndMore
         {
             MessageBox.Show("Couldn't find game installation path!\n\n" +
                             "Please specify the installation path yourself...", "Elden Ring FPS Unlocker and more", MessageBoxButton.OK, MessageBoxImage.Exclamation);
-            string gameExePath = OpenFile("Select eldenring.exe", "C:\\", new[] { "eldenring.exe" }, new[] { "Elden Ring Executable" }, true);
+            string gameExePath = OpenFile("Select eldenring.exe", "C:\\", new[] { "*.exe" }, new[] { "Elden Ring Executable" }, true);
             if (string.IsNullOrEmpty(gameExePath) || !File.Exists(gameExePath))
                 Environment.Exit(0);
+            Properties.Settings.Default.GameName = Path.GetFileNameWithoutExtension(gameExePath);
             return gameExePath;
         }
 
@@ -181,14 +191,14 @@ namespace EldenRingFPSUnlockAndMore
             if (!File.Exists(gameExePath))
             {
                 gamePath = path ?? GetApplicationPath("ELDEN RING");
-                if (gamePath == null || (!File.Exists(Path.Combine(gamePath, "eldenring.exe")) && !File.Exists(Path.Combine(gamePath, "GAME", "eldenring.exe"))))
+                if (gamePath == null || (!File.Exists(Path.Combine(gamePath, $"{Properties.Settings.Default.GameName}.exe")) && !File.Exists(Path.Combine(gamePath, "GAME", $"{Properties.Settings.Default.GameName}.exe"))))
                     gameExePath = PromptForGamePath();
                 else
                 {
-                    if (File.Exists(Path.Combine(gamePath, "GAME", "eldenring.exe")))
-                        gameExePath = Path.Combine(gamePath, "GAME", "eldenring.exe");
-                    else if (File.Exists(Path.Combine(gamePath, "eldenring.exe")))
-                        gameExePath = Path.Combine(gamePath, "eldenring.exe");
+                    if (File.Exists(Path.Combine(gamePath, "GAME", $"{Properties.Settings.Default.GameName}.exe")))
+                        gameExePath = Path.Combine(gamePath, "GAME", $"{Properties.Settings.Default.GameName}.exe");
+                    else if (File.Exists(Path.Combine(gamePath, $"{Properties.Settings.Default.GameName}.exe")))
+                        gameExePath = Path.Combine(gamePath, $"{Properties.Settings.Default.GameName}.exe");
                     else
                         gameExePath = PromptForGamePath();
                 }
@@ -233,14 +243,14 @@ namespace EldenRingFPSUnlockAndMore
                 Verb = "runas",
                 FileName = "cmd.exe",
                 WorkingDirectory = gamePath,
-                Arguments = $"/C \"eldenring.exe -noeac\""
+                Arguments = $"/C \"{Properties.Settings.Default.GameName}.exe -noeac\""
             };
             Process procGameStarter = new Process
             {
                 StartInfo = siGame
             };
             procGameStarter.Start();
-            await WaitForProgram("eldenring", 10000);
+            await WaitForProgram(Properties.Settings.Default.GameName, 10000);
             await Task.Delay(2000);
             procGameStarter.Close();
         }
@@ -273,10 +283,10 @@ namespace EldenRingFPSUnlockAndMore
         /// <summary>
         /// Opens the game for full access.
         /// </summary>
-        private bool OpenGame()
+        private async Task<bool> OpenGame(bool retry = false)
         {
             UpdateStatus("accessing game...", Brushes.Orange);
-            Process[] procList = Process.GetProcessesByName(GameData.PROCESS_NAME);
+            Process[] procList = Process.GetProcessesByName(Properties.Settings.Default.GameName);
             if (procList.Length != 1)
             {
                 MessageBox.Show("Couldn't find the game! Start the game without EAC manually.", "Elden Ring FPS Unlocker and more", MessageBoxButton.OK, MessageBoxImage.Exclamation);
@@ -290,8 +300,21 @@ namespace EldenRingFPSUnlockAndMore
             _gameAccessHwndStatic = _gameAccessHwnd;
             if (_gameHwnd == IntPtr.Zero || _gameAccessHwnd == IntPtr.Zero || _gameProc.MainModule.BaseAddress == IntPtr.Zero)
             {
-                MessageBox.Show("Couldn't gain access to game process!", "Elden Ring FPS Unlocker and more", MessageBoxButton.OK, MessageBoxImage.Exclamation);
-                return false;
+                UpdateStatus("no game access...", Brushes.Red);
+                LogToFile($"Process: {_gameProc.ProcessName} - {_gameProc.MainWindowTitle}");
+                LogToFile($"hWnd: {_gameHwnd:X}");
+                LogToFile($"Access hWnd: {_gameAccessHwnd}:X");
+                LogToFile($"BaseAddress: {_gameProc.MainModule.BaseAddress:X}");
+                if (!retry)
+                {
+                    await Task.Delay(5000);
+                    return await OpenGame(true);
+                }
+                else
+                {
+                    MessageBox.Show("Couldn't gain access to game process!", "Elden Ring FPS Unlocker and more", MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                    return false;
+                }
             }
             UpdateStatus("game init...", Brushes.Orange);
             return true;
@@ -303,6 +326,7 @@ namespace EldenRingFPSUnlockAndMore
         private void ReadGame(object sender, DoWorkEventArgs doWorkEventArgs)
         {
             PatternScan patternScan = new PatternScan(_gameAccessHwnd, _gameProc.MainModule);
+            _memoryCaveGenerator = new MemoryCaveGenerator(_gameAccessHwnd, _gameProc.MainModule.BaseAddress.ToInt64());
 
             _offset_framelock = patternScan.FindPattern(GameData.PATTERN_FRAMELOCK) + GameData.PATTERN_FRAMELOCK_OFFSET;
             Debug.WriteLine($"fFrameTick found at: 0x{_offset_framelock:X}");
@@ -313,13 +337,48 @@ namespace EldenRingFPSUnlockAndMore
                     _offset_framelock = 0x0;
             }
 
-            long pFovTable = patternScan.FindPattern(GameData.PATTERN_FOVTABLEPTR) + GameData.PATTERN_FOVTABLEPTR_OFFSET;
-            Debug.WriteLine($"fpFovTable found at: 0x{pFovTable:X}");
-            if (IsValidAddress(pFovTable))
+            _offset_fovmultiplier = patternScan.FindPattern(GameData.PATTERN_FOV_MULTIPLIER) + GameData.PATTERN_FOV_MULTIPLIER_OFFSET;
+            Debug.WriteLine($"pFovMultiplier found at: 0x{_offset_fovmultiplier:X}");
+            if (!IsValidAddress(_offset_fovmultiplier))
+                _offset_fovmultiplier = 0x0;
+            else
             {
-                _offset_fovtable = DereferenceRelativeOffset(pFovTable);
-                if (!IsValidAddress(_offset_fovtable))
-                    _offset_fovtable = 0x0;
+                if (_memoryCaveGenerator.CreateNewCodeCave(_CODECAVE_FOV_MULTIPLIER, _offset_fovmultiplier, GameData.INJECT_FOV_MULTIPLIER_OVERWRITE_LENGTH, GameData.INJECT_FOV_MULTIPLIER_SHELLCODE, true))
+                {
+                    Debug.WriteLine($"pFovMultiplier code cave at: 0x{_memoryCaveGenerator.GetCodeCaveAddressByName(_CODECAVE_FOV_MULTIPLIER):X}");
+                    if (_memoryCaveGenerator.CreateNewDataCave(_DATACAVE_FOV_MULTIPLIER, _memoryCaveGenerator.GetCodeCaveAddressByName(_CODECAVE_FOV_MULTIPLIER) + GameData.INJECT_FOV_MULTIPLIER_SHELLCODE_OFFSET, BitConverter.GetBytes(1.0f), PointerStyle.dwRelative))
+                    {
+                        Debug.WriteLine($"pFovMultiplier data cave at: 0x{_memoryCaveGenerator.GetDataCaveAddressByName(_DATACAVE_FOV_MULTIPLIER):X}");
+                        if (_memoryCaveGenerator.ActivateDataCaveByName(_DATACAVE_FOV_MULTIPLIER))
+                            _codeCave_fovmultiplier = true;
+                    }
+                }
+            }
+
+            long ref_lpTimeRelated = patternScan.FindPattern(GameData.PATTERN_TIMESCALE) + GameData.PATTERN_TIMESCALE_OFFSET;
+            Debug.WriteLine($"ref_lpTimeRelated found at: 0x{ref_lpTimeRelated:X}");
+            if (IsValidAddress(ref_lpTimeRelated))
+            {
+                long lpTimescaleManager = DereferenceRelativeOffset(ref_lpTimeRelated);
+                Debug.WriteLine($"lpTimescaleManager found at: 0x{lpTimescaleManager:X}");
+                if (IsValidAddress(lpTimescaleManager))
+                {
+                    _offset_timescale = Read<Int64>(lpTimescaleManager) + Read<Int32>(ref_lpTimeRelated + GameData.PATTERN_TIMESCALE_POINTER_OFFSET);
+                    Debug.WriteLine($"fTimescale found at: 0x{_offset_timescale:X}");
+                    if (!IsValidAddress(_offset_timescale))
+                        _offset_timescale = 0x0;
+                }
+            }
+
+            _offset_deathpenalty = patternScan.FindPattern(GameData.PATTERN_DEATHPENALTY) + GameData.PATTERN_DEATHPENALTY_OFFSET;
+            Debug.WriteLine($"death penalty found at: 0x{_offset_deathpenalty:X}");
+            if (!IsValidAddress(_offset_deathpenalty))
+                _offset_fovmultiplier = 0x0;
+            else 
+            {
+                _patch_deathpenalty_disable = new byte[GameData.PATCH_DEATHPENALTY_INSTRUCTION_LENGTH];
+                if (!WinAPI.ReadProcessMemory(_gameAccessHwndStatic, _offset_deathpenalty, _patch_deathpenalty_disable, GameData.PATCH_DEATHPENALTY_INSTRUCTION_LENGTH, out _))
+                    _offset_deathpenalty = 0x0;
             }
 
             patternScan.Dispose();
@@ -330,6 +389,7 @@ namespace EldenRingFPSUnlockAndMore
         /// </summary>
         private void OnReadGameFinish(object sender, RunWorkerCompletedEventArgs runWorkerCompletedEventArgs)
         {
+            UpdateStatus("ready...", Brushes.Green);
             if (_offset_framelock == 0x0)
             {
                 UpdateStatus("frame tick not found...", Brushes.Red);
@@ -337,15 +397,68 @@ namespace EldenRingFPSUnlockAndMore
                 cbFramelock.IsEnabled = false;
             }
 
-            if (_offset_fovtable == 0x0)
+            if (_offset_fovmultiplier == 0x0 || !_codeCave_fovmultiplier)
             {
-                UpdateStatus("FOV table not found...", Brushes.Red);
-                LogToFile("FOV table not found...");
+                UpdateStatus("FOV multiplier not found...", Brushes.Red);
+                LogToFile("FOV multiplier not found...");
                 cbFov.IsEnabled = false;
             }
 
+            if (_offset_deathpenalty == 0x0)
+            {
+                UpdateStatus("death penalty not found...", Brushes.Red);
+                LogToFile("death penalty not found...");
+                cbDeathPenalty.IsEnabled = false;
+            }
+
+            if (_offset_timescale == 0x0)
+            {
+                UpdateStatus("time scale not found...", Brushes.Red);
+                LogToFile("time scale not found...");
+                cbGameSpeed.IsEnabled = false;
+            }
+
             bPatch.IsEnabled = true;
+            _running = true;
             PatchGame();
+        }
+
+        /// <summary>
+        /// Determines whether everything is ready for patching.
+        /// </summary>
+        /// <returns>True if we can patch game, false otherwise.</returns>
+        private bool CanPatchGame()
+        {
+            if (!_running) 
+                return false;
+            if (!_gameProc.HasExited) 
+                return true;
+
+            _running = false;
+            if (_gameAccessHwnd != IntPtr.Zero)
+                WinAPI.CloseHandle(_gameAccessHwnd);
+            _gameProc = null;
+            _gameHwnd = IntPtr.Zero;
+            _gameAccessHwnd = IntPtr.Zero;
+            _gameAccessHwndStatic = IntPtr.Zero;
+            _offset_framelock = 0x0;
+            _offset_fovmultiplier = 0x0;
+            _offset_deathpenalty = 0x0;
+            _offset_timescale = 0x0;
+            _startup = true;
+            _patch_deathpenalty_disable = null;
+            _codeCave_fovmultiplier = false;
+            _memoryCaveGenerator.ClearCaves();
+            _memoryCaveGenerator = null;
+            cbFramelock.IsEnabled = true;
+            cbFov.IsEnabled = true;
+            cbDeathPenalty.IsEnabled = true;
+            cbGameSpeed.IsEnabled = true;
+            bPatch.IsEnabled = false;
+            UpdateStatus("waiting for game...", Brushes.White);
+            _dispatcherTimerGameCheck.Start();
+
+            return false;
         }
 
         /// <summary>
@@ -353,8 +466,12 @@ namespace EldenRingFPSUnlockAndMore
         /// </summary>
         private void PatchGame()
         {
+            if (!CanPatchGame())
+                return;
             PatchFramelock();
             PatchFov();
+            PatchDeathPenalty();
+            PatchGameSpeed();
             UpdateStatus("game patched!", Brushes.Green);
         }
 
@@ -363,7 +480,7 @@ namespace EldenRingFPSUnlockAndMore
         /// </summary>
         private bool PatchFramelock()
         {
-            if (!cbFramelock.IsEnabled || _offset_framelock == 0x0) return false;
+            if (!cbFramelock.IsEnabled || _offset_framelock == 0x0 || !CanPatchGame()) return false;
             if (cbFramelock.IsChecked == true)
             {
                 int fps = -1;
@@ -400,7 +517,7 @@ namespace EldenRingFPSUnlockAndMore
         /// </summary>
         private bool PatchFov()
         {
-            if (!cbFov.IsEnabled || _offset_fovtable == 0x0) return false;
+            if (!cbFov.IsEnabled || _offset_fovmultiplier == 0x0 || !CanPatchGame()) return false;
             if (cbFov.IsChecked == true)
             {
                 bool isNumber = Int32.TryParse(tbFov.Text, out int fovIncrease);
@@ -415,15 +532,66 @@ namespace EldenRingFPSUnlockAndMore
                     fovIncrease = 95;
                 }
 
-                float fovValue = (float)(Math.PI / 180) * ((fovIncrease / 100.0f) + 1); // convert change in %degree to radians
-                WriteBytes(_offset_fovtable, BitConverter.GetBytes(fovValue));
+                float fovValue = 1.0f + (fovIncrease / 100f);
+                _memoryCaveGenerator.UpdateDataCaveValueByName(_DATACAVE_FOV_MULTIPLIER, BitConverter.GetBytes(fovValue));
+                _memoryCaveGenerator.ActivateCodeCaveByName(_CODECAVE_FOV_MULTIPLIER);
             }
             else if (cbFov.IsChecked == false)
             {
-                WriteBytes(_offset_fovtable, BitConverter.GetBytes(GameData.PATTERN_FOVTABLEPTR_DISABLE));
+                _memoryCaveGenerator.DeactivateCodeCaveByName(_CODECAVE_FOV_MULTIPLIER);
                 return false;
             }
 
+            return true;
+        }
+
+        /// <summary>
+        /// Patches the game's death penalties.
+        /// </summary>
+        private bool PatchDeathPenalty()
+        {
+            if (!cbDeathPenalty.IsEnabled || _offset_deathpenalty == 0x0 || !CanPatchGame()) return false;
+            if (cbDeathPenalty.IsChecked == true)
+            {
+                WriteBytes(_offset_deathpenalty, GameData.PATCH_DEATHPENALTY_ENABLE);
+            }
+            else if (cbDeathPenalty.IsChecked == false)
+            {
+                WriteBytes(_offset_deathpenalty, _patch_deathpenalty_disable);
+                return false;
+            }
+            return true;
+        }
+
+        /// <summary>
+        /// Patches game's global speed.
+        /// </summary>
+        private bool PatchGameSpeed()
+        {
+            if (!cbGameSpeed.IsEnabled || _offset_timescale == 0x0 || !CanPatchGame()) return false;
+            if (cbGameSpeed.IsChecked == true)
+            {
+                bool isNumber = Int32.TryParse(tbGameSpeed.Text, out int gameSpeed);
+                if (gameSpeed < 0 || !isNumber)
+                {
+                    tbGameSpeed.Text = "100";
+                    gameSpeed = 100;
+                }
+                else if (gameSpeed >= 999)
+                {
+                    tbGameSpeed.Text = "999";
+                    gameSpeed = 1000;
+                }
+                float timeScale = gameSpeed / 100f;
+                if (timeScale < 0.01f)
+                    timeScale = 0.0001f;
+                WriteBytes(_offset_timescale, BitConverter.GetBytes(timeScale));
+            }
+            else if (cbGameSpeed.IsChecked == false)
+            {
+                WriteBytes(_offset_timescale, BitConverter.GetBytes(1.0f));
+                return false;
+            }
             return true;
         }
 
@@ -640,6 +808,8 @@ namespace EldenRingFPSUnlockAndMore
         {
             // save all settings
             Properties.Settings.Default.Save();
+
+            WinAPI.CloseHandle(_gameAccessHwnd);
         }
 
         /// <summary>
@@ -719,6 +889,33 @@ namespace EldenRingFPSUnlockAndMore
                 if (cbFov.IsChecked == true) 
                     PatchFov();
             }
+        }
+
+        private void BGsLower_Click(object sender, RoutedEventArgs e)
+        {
+            if (Int32.TryParse(tbGameSpeed.Text, out int gameSpeed) && gameSpeed > 4)
+            {
+                tbGameSpeed.Text = (gameSpeed - 5).ToString();
+                if (cbGameSpeed.IsChecked == true) 
+                    PatchGameSpeed();
+            }
+        }
+
+        private void BGsHigher_Click(object sender, RoutedEventArgs e)
+        {
+            if (Int32.TryParse(tbGameSpeed.Text, out int gameSpeed) && gameSpeed < 995)
+            {
+                tbGameSpeed.Text = (gameSpeed + 5).ToString();
+                if (cbGameSpeed.IsChecked == true) 
+                    PatchGameSpeed();
+            }
+        }
+
+        private void BGs100_Click(object sender, RoutedEventArgs e)
+        {
+            tbGameSpeed.Text = "100";
+            if (cbGameSpeed.IsChecked == true) 
+                PatchGameSpeed();
         }
     }
 }

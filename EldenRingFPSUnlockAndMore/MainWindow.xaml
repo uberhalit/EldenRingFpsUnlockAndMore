@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:EldenRingFPSUnlockAndMore"
         xmlns:p="clr-namespace:EldenRingFPSUnlockAndMore.Properties" 
         mc:Ignorable="d"
-        Title="Elden Ring FPS Unlocker &quot;and more&quot;" Width="Auto" Height="Auto" SizeToContent="WidthAndHeight" ResizeMode="CanMinimize" Loaded="Window_Loaded" Closing="Window_Closing" >
+        Title="Elden Ring FPS Unlocker and more" Width="Auto" Height="Auto" SizeToContent="WidthAndHeight" ResizeMode="CanMinimize" Loaded="Window_Loaded" Closing="Window_Closing" >
     
     <Grid x:Name="gMainGrid" Background="#FFF9F9F9">
         <DockPanel>
@@ -22,6 +22,20 @@
                     <Button x:Name="bFovLower" DockPanel.Dock="Right" Content="&lt;" Margin="0,0,3,0" Width="25" Height="25" FontSize="14 px" BorderThickness="1" Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}" Focusable="False" Click="BFovLower_Click" />
                     <Button x:Name="bFov0" DockPanel.Dock="Right" Content="0" Margin="0,0,3,0" Width="27" Height="25" FontSize="14 px" BorderThickness="1" Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}" Focusable="False" Click="BFov0_Click" />
                 </DockPanel>
+                <Expander x:Name="exGameMods" Margin="-3,5,0,0" Height="Auto" FontSize="14 px" Header="Modifications" IsExpanded="True" TabIndex="11">
+                    <Grid x:Name="gSubGrid1" Margin="3,1,0,0" Background="#FFF9F9F9">
+                        <StackPanel Width="Auto" Height="Auto">
+                            <CheckBox x:Name="cbDeathPenalty" Margin="0,3,0,0" Height="25" FontSize="14 px" VerticalContentAlignment="Center" Content="Disable Runes loss on death" ToolTip="Disables Runes loss upon death" IsChecked="{Binding Source={x:Static p:Settings.Default}, Path=DisablePenaltyTicked, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" TabIndex="16" />
+                            <DockPanel Margin="0,3,0,0" LastChildFill="False">
+                                <CheckBox x:Name="cbGameSpeed" DockPanel.Dock="Left" Margin="0,0,0,0" Height="25" FontSize="14 px" VerticalContentAlignment="Center" Content="Game speed (%):" ToolTip="Increase or decrease. Can potentially crash the game in cutscenes, use with caution" IsChecked="{Binding Source={x:Static p:Settings.Default}, Path=GameSpeedTicked, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" TabIndex="18"  />
+                                <Button x:Name="bGs100" DockPanel.Dock="Right" Content="100" Margin="0,0,0,0" Width="30" Height="25" FontSize="14 px" BorderThickness="1" Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}" Focusable="False" Click="BGs100_Click" />
+                                <Button x:Name="bGsHigher" DockPanel.Dock="Right" Content="&gt;" Margin="0,0,3,0" Width="25" Height="25" FontSize="14 px" BorderThickness="1" Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}" Focusable="False" Click="BGsHigher_Click" />
+                                <TextBox x:Name="tbGameSpeed" DockPanel.Dock="Right" Margin="0,0,3,0" Width="30" Height="25" FontSize="14 px" VerticalContentAlignment="Center" Text="{Binding Source={x:Static p:Settings.Default}, Path=GameSpeed, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" TextAlignment="Center" MaxLength="3" TabIndex="19" />
+                                <Button x:Name="bGsLower" DockPanel.Dock="Right" Content="&lt;" Margin="0,0,3,0" Width="25" Height="25" FontSize="14 px" BorderThickness="1" Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}" Focusable="False" Click="BGsLower_Click" />
+                            </DockPanel>
+                        </StackPanel>
+                    </Grid>
+                </Expander>
                 <Button x:Name="bStart" Margin="0,7,0,0" Width="300" Height="30" FontSize="14 px" IsEnabled="False" Content="Start game" BorderThickness="1" Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}" 
                     Focusable="False" TabIndex="20" IsTabStop="False" Click="bStart_Click" />
                 <Button x:Name="bPatch" Margin="0,7,0,0" Width="300" Height="30" FontSize="14 px" IsEnabled="False" Content="Patch game" BorderThickness="1" Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}" 
@@ -32,18 +46,15 @@
                         <TextBlock.Inlines>
                             <Run FontWeight="Bold" Foreground="#FFF00000">DON'T RUN THIS IN ONLINE MODE OR WITH EAC ENABLED!</Run>
                             <Run FontWeight="Bold" Foreground="#FF0046FF">This patcher does not modify game files, you have to start it every time.</Run>
-                            <Run FontWeight="Bold">If your monitor is 60 Hz you will have to use</Run>
-                            <Run FontWeight="Bold" Foreground="#FFF00000">fullscreen mode and force disable VSYNC</Run>
+                            <Run FontWeight="Bold">Use</Run>
+                            <Run FontWeight="Bold" Foreground="#FFF00000">borderless windowed mode and force disable VSYNC</Run>
                             <Run FontWeight="Bold">with Nvidia Control panel or AMD Radeon Settings to get frame rate unlock working.</Run>
-                            <Run FontWeight="Bold">If your monitor is >60 Hz you will have to use</Run>
-                            <Run FontWeight="Bold" Foreground="#FFF00000">borderless window mode or force the game to run on highest available refresh rate</Run>
-                            <Run FontWeight="Bold">using Nvidia Control panel or AMD Radeon Settings.</Run>
                         </TextBlock.Inlines>
                     </TextBlock>
                 </Expander>
                 <Label HorizontalAlignment="Right" FontSize="12 px" TabIndex="22">
                     <Hyperlink NavigateUri="https://github.com/uberhalit/EldenRingFpsUnlockAndMore" RequestNavigate="Hyperlink_RequestNavigate">
-                        v0.0.0.3-beta - by uberhalit
+                        v0.0.0.4-beta - by uberhalit
                     </Hyperlink>
                 </Label>
             </StackPanel>
