@@ -130,5 +130,17 @@ namespace EldenRingFPSUnlockAndMore.Properties {
                 this["GameName"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool WidescreenTicked {
+            get {
+                return ((bool)(this["WidescreenTicked"]));
+            }
+            set {
+                this["WidescreenTicked"] = value;
+            }
+        }
     }
 }

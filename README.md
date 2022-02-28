@@ -1,75 +1,73 @@
-# EXPERIMENTAL! NOT YET TESTED MUCH
+# BETA-RELEASE
 Please make sure your game is set to offline and you start the game without EAC through the utility.
 
 # Elden Ring FPS Unlocker and more
-
-A small utility to remove frame rate limit, change FOV (Field of View), alter Game Speed and various game modifications for [Elden Ring](https://en.bandainamcoent.eu/elden-ring/elden-ring) written in C#. More features soon!
+A small utility to remove frame rate limit, change FOV (Field of View), add widescreen supprt, alter Game Speed and various game modifications for [Elden Ring](https://en.bandainamcoent.eu/elden-ring/elden-ring) written in C#. More features soon!
 Patches games memory while running, does not modify any game files. Works with every game version (legit steam & oh-not-so-legit), should work with all future updates.
 
 ## Download
-
 **[Get the latest release here](https://github.com/uberhalit/EldenRingFpsUnlockAndMore/releases)**
 
 ## Features
-
 * does not modify any game files, RAM patches only
 * works with legit, unmodified steam version as well as with unpacked, not-so-legit versions
-* unlock frame rate (remove FPS limit) by setting a new custom limit (currently limited to (borderless) window mode)
+* unlock frame rate (remove FPS limit)
+* remove forced 60 Hertz (Hz) limit in fullscreen
 * increase or decrease field of view (FOV)
+* add support for widesscreen monitors
 * game modifications
   * global game speed modifier (increase or decrease)
   * disable losing Runes on death
 
 ## Usage
-
 The graphic setup has to be done only once but as the patcher hot-patches the memory **you have to start the patcher every time you want to use any of its features**.
-
 The game enforces VSYNC and forces 60 Hz in fullscreen even on 144 Hz monitors so we have to override these.
 
-#### Nvidia: Use Nvidia Control Panel to set 'Vsync' to 'Off' and 'Preferred Refreshrate' to 'Highest available' on a Elden Ring Profile, then use borderless windows mode.
-#### AMD: Use Radeon Settings to set 'Wait for Vertical Refresh' to 'Enhanced Sync' on a Elden Ring profile, then use borderless windows mode.
+#### Nvidia: Use Nvidia Control Panel to set 'Preferred Refreshrate' to 'Highest available' on a Elden Ring Profile, if you aren't using GSYNC/FreeSYNC then set 'Vsync' to 'Off'.
+#### AMD: Use Radeon Settings to set 'Wait for Vertical Refresh' to 'Enhanced Sync' of 'Fast Sync' on a Elden Ring profile.
 
-### Follow these steps on Nvidia:
+### Follow these steps on Nvidia (see below for GSYNC):
 1. Open Nvidia Control Panel
 2. Navigate to `Display -> Change resolution`
 3. **Make sure your monitor is set to the highest Refresh rate possible:**
-4.  [![Make sure your monitor is set to the highest Refresh rate possible](https://camo.githubusercontent.com/331eb420bee67f4e57d7e46601bfd51f462de68f/68747470733a2f2f692e696d6775722e636f6d2f625667767155372e706e67)](#)
+4. [![Make sure your monitor is set to the highest Refresh rate possible](https://user-images.githubusercontent.com/19159295/155911492-f6410e73-bcc9-457a-b2da-57f7625c3b68.PNG)](#)
 5. Navigate to `3D Settings -> Manage 3D settings -> Program Settings -> Elden Ring`
 6. **Set `Preferred refresh rate` to `Highest available`**
 7. **Set `Vertical sync` to `Off`**
-8. Hit apply and close Nvidia Control Panel
-9. Start `Elden Ring FPS Unlocker and more` and start the game through the first button
-10. Use borderless window mode for now
+8. [![Preferred refresh rate to Highest available, VSYNC to Off](https://user-images.githubusercontent.com/19159295/155911494-a50af476-5367-42b1-90f1-106aaa28f368.PNG)](#)
+9. Hit apply and close Nvidia Control Panel
+10. Start `Elden Ring FPS Unlocker and more` and start the game through the first button
 11. Set your new refresh rate limit, tick the checkbox and click `Patch game`
 
 ### Follow these steps on AMD:
 1. Right click on Desktop -> `Display settings`
 2. Scroll down and click `Advanced Display Settings -> Display Adapter Properties`
 3. **Switch to `Monitor` tab and make sure your monitor is set to the highest Refresh rate possible:**
-4. Open Radeon Settings
-5. Navigate to `Gaming -> Elden Ring` or add it manually if it's missing: `Add -> Browse -> Elden Ring`
-6. **Set `Wait for Vertical Refresh` to `Enhanced Sync`**:
-7. Apply and close Radeon Settings
-8. Start `Elden Ring FPS Unlocker and more` and start the game through the first button
-9. Use borderless window mode for now
-10. Set your new refresh rate limit, tick the checkbox and click `Patch game`
+4. [![Make sure your monitor is set to the highest Refresh rate possible](https://camo.githubusercontent.com/8ba71a0b512eb68509f7e7506a92a78f3cd47537/68747470733a2f2f692e696d6775722e636f6d2f61774b4862774d2e706e67)](#)
+5. Open Radeon Settings
+6. Navigate to `Gaming -> Elden Ring` or add it manually if it's missing: `Add -> Browse -> Elden Ring`
+7. **Set `Wait for Vertical Refresh` to `Enhanced Sync`, `Fast Sync` or `Always Off`**:
+8. [![Wait for Vertical Refresh Enhanced Sync](https://camo.githubusercontent.com/7c00daebb59c7e46c455e30b6caa055c63185dcb/68747470733a2f2f692e696d6775722e636f6d2f456e77595146322e706e67)](#)
+9. Apply and close Radeon Settings
+10. Start `Elden Ring FPS Unlocker and more` and start the game through the first button
+11. Set your new refresh rate limit, tick the checkbox and click `Patch game`
 
 ### To play the game with GSYNC do these additional steps (Nvidia):
 1. Under Nvidia Control Panel navigate to `3D Settings -> Manage 3D settings -> Program Settings -> Elden Ring`
 2. Set `Monitor Technology` to `G-SYNC`
 3. You can keep `Vertical sync` on `Use the 3D application setting` now to help remove frame time stutters ([see here](https://www.blurbusters.com/gsync/gsync101-input-lag-tests-and-settings/15/))
 4. Make sure that `Preferred refresh rate` is still set to `Highest available`
-5. Don't forget to Apply and close Nvidia Control Panel
-6. Use a 3rd party frame rate limiter like [RTSS](https://www.guru3d.com/files-details/rtss-rivatuner-statistics-server-download.html) and set a frame rate limit just a few fps below your monitor refresh rate, on a 144Hz Monitor use 138
-7. Start `Elden Ring FPS Unlocker and more` and set FPS lock to your monitors refresh rate
-8. Start the game and set it to borderless window
+5. [![GSYNC Settings](https://user-images.githubusercontent.com/19159295/155911496-5fda4bc9-1b8e-4f79-a76d-4a130d65fbe6.PNG)](#)
+6. Don't forget to Apply and close Nvidia Control Panel
+7. Use a 3rd party frame rate limiter like [RTSS](https://www.guru3d.com/files-details/rtss-rivatuner-statistics-server-download.html) and set a frame rate limit just a few fps below your monitor refresh rate, on a 144Hz Monitor use 138
+8. Start `Elden Ring FPS Unlocker and more` and start the game through the first button
+9. Set your new refresh rate limit, tick the checkbox and click `Patch game`
 
-### To add a custom resolution:
-*soon!*
+### On 'Change FOV by (%)'
+Increase or decrease the games Field Of Fiew (FOV) between -95% and +95%.
 
-### To use the FOV changer:
-1. Set a new FOV value
-2. Tick the checkbox and confirm with `Patch game`
+### On 'Widescreen support'
+Adds your monitors **native resolution** to the games video options overwriting the default 1920x1080 resolution. This will allow widescreen monitors to use their full resolution and aspect ratio.
 
 ### On 'Disable Runes loss on death':
 Like 'Unseen Aid' in Sekiro you will not lose any Runes upon death with this option enabled.
@@ -83,7 +81,7 @@ Slow down the game to beat a boss like a game journalist or speed it up and beco
 * If you are using ReShade make sure your preset doesn't enforce 60 Hz, try removing ReShade and see if it solves the problem
 * Try adding the whole game folder and `Elden Ring FPS Unlocker and more` to your antivirus's exclusion list
 * Try disabling `Steam Broadcast` (streaming via overlay)
-* Try to force disable VSYNC even when you are using GSYNC
+* Try to force disable VSYNC even when you are using GSYNC/FreeSync/FastSync
 * Close and disable all screen recording and streaming applications
 * Close and disable all overlays
 * Close and disable all performance "booster" programs and alike
@@ -98,33 +96,34 @@ Slow down the game to beat a boss like a game journalist or speed it up and beco
   8. Reconnect internet
 
 ## Prerequisites
-
 * .NET Framework 4.8
 * administrative privileges (for patching)
 * 64 bit OS
 
 ## Building
-
-Use Visual Studio 2022 to build
+Use Visual Studio 2022 to build and remove the missing `icon.ico` from build process.
 
 ## Contributing
-
 Feel free to open an issue or create a pull request at any time
 
 ## License
-
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details
 
 ## Credits
 * [Darius Dan](http://www.dariusdan.com) for the icon
 
 ## Limitations
-
 * the game has forced VSYNC so unlocking the frame rate when your monitor has 60Hz will do nothing. You'll have to disable VSYNC in Nvidia Control Panel or AMD Radeon Settings first, see Usage
-* in fullscreen the game forces the monitor to 60 Hz and there is currently no known way to bypass this, user borderless window mode
+* in fullscreen the game forces the monitor to 60 Hz so you'll have to handle this with driver override too, see Usage
+* your monitor has to natively support the widescreen resolution otherwise it won't show up correctly
 * game speed modification can potentially crash the game in certain cutscenes and NPC interactions, use with caution
 
 ## Version History
+* v0.0.0.5-beta (2022-02-27)
+  * frame rate unlock now removes 60 Hz lock in fullscreen too (screw you FromSoft!)
+  * added widescreen support patch
+  * fixed a bug that would prevent re-starting the game correctly after exiting through main menu
+  * minor fixes
 * v0.0.0.4-beta (2022-02-26)
   * fixed issues with FOV changer
   * added game speed modifier

@@ -12,31 +12,34 @@
         <DockPanel>
             <StackPanel DockPanel.Dock="Top" Margin="10,10,10,0" Width="300" Height="Auto">
                 <DockPanel LastChildFill="False">
-                    <CheckBox x:Name="cbFramelock" DockPanel.Dock="Left" Margin="0,0,0,0" Height="25" FontSize="14 px" VerticalContentAlignment="Center" Content="Frame rate lock:" ToolTip="Make sure to read the guide" IsChecked="{Binding Source={x:Static p:Settings.Default}, Path=FrameLockTicked, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" TabIndex="1" />
-                    <TextBox x:Name="tbFramelock" DockPanel.Dock="Right" Margin="0,0,0,0" Width="116" Height="25" FontSize="14 px" VerticalContentAlignment="Center" Text="{Binding Source={x:Static p:Settings.Default}, Path=FrameLock, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" MaxLength="3" TabIndex="2" />
+                    <CheckBox x:Name="cbFramelock" DockPanel.Dock="Left" Margin="0,0,0,0" Height="25" FontSize="14 px" VerticalContentAlignment="Center" Content="Frame rate lock:" ToolTip="Make sure to read the guide" IsChecked="{Binding FrameLockTicked, Source={x:Static p:Settings.Default}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" TabIndex="1" />
+                    <TextBox x:Name="tbFramelock" DockPanel.Dock="Right" Margin="0,0,0,0" Width="116" Height="25" FontSize="14 px" VerticalContentAlignment="Center" Text="{Binding FrameLock, Source={x:Static p:Settings.Default}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" MaxLength="3" TabIndex="2" />
                 </DockPanel>
                 <DockPanel Margin="0,5,0,0" LastChildFill="False">
-                    <CheckBox x:Name="cbFov" DockPanel.Dock="Left" Margin="0,0,0,0" Height="25" FontSize="14 px" VerticalContentAlignment="Center" Content="Change FOV by (%):" ToolTip="Increase or decrease" IsChecked="{Binding Source={x:Static p:Settings.Default}, Path=FovTicked, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" TabIndex="6" />
+                    <CheckBox x:Name="cbFov" DockPanel.Dock="Left" Margin="0,0,0,0" Height="25" FontSize="14 px" VerticalContentAlignment="Center" Content="Change FOV by (%):" ToolTip="Increase or decrease" IsChecked="{Binding FovTicked, Source={x:Static p:Settings.Default}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" TabIndex="6" />
                     <Button x:Name="bFovHigher" DockPanel.Dock="Right" Content="&gt;" Margin="0,0,0,0" Width="25" Height="25" FontSize="14 px" BorderThickness="1" Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}" Focusable="False" Click="BFovHigher_Click" />
-                    <TextBox x:Name="tbFov" DockPanel.Dock="Right" Margin="0,0,3,0" Width="30" Height="25" FontSize="14 px" VerticalContentAlignment="Center" Text="{Binding Source={x:Static p:Settings.Default}, Path=Fov, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" TextAlignment="Center" MaxLength="3" TabIndex="7" />
+                    <TextBox x:Name="tbFov" DockPanel.Dock="Right" Margin="0,0,3,0" Width="30" Height="25" FontSize="14 px" VerticalContentAlignment="Center" Text="{Binding Fov, Source={x:Static p:Settings.Default}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" TextAlignment="Center" MaxLength="3" TabIndex="7" />
                     <Button x:Name="bFovLower" DockPanel.Dock="Right" Content="&lt;" Margin="0,0,3,0" Width="25" Height="25" FontSize="14 px" BorderThickness="1" Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}" Focusable="False" Click="BFovLower_Click" />
                     <Button x:Name="bFov0" DockPanel.Dock="Right" Content="0" Margin="0,0,3,0" Width="27" Height="25" FontSize="14 px" BorderThickness="1" Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}" Focusable="False" Click="BFov0_Click" />
                 </DockPanel>
-                <Expander x:Name="exGameMods" Margin="-3,5,0,0" Height="Auto" FontSize="14 px" Header="Modifications" IsExpanded="True" TabIndex="11">
+                <DockPanel Margin="0,5,0,0" LastChildFill="False">
+                    <CheckBox x:Name="cbAddWidescreen" DockPanel.Dock="Left" Margin="0,0,0,0" Height="25" FontSize="14 px" VerticalContentAlignment="Center" Content="Widescreen support" ToolTip="Adds your monitors native resolution to the game" IsChecked="{Binding WidescreenTicked, Mode=TwoWay, Source={x:Static p:Settings.Default}, UpdateSourceTrigger=PropertyChanged}" TabIndex="3" />
+                </DockPanel>
+                <Expander x:Name="exGameMods" Height="Auto" FontSize="14 px" Header="Modifications" IsExpanded="True" TabIndex="11">
                     <Grid x:Name="gSubGrid1" Margin="3,1,0,0" Background="#FFF9F9F9">
                         <StackPanel Width="Auto" Height="Auto">
-                            <CheckBox x:Name="cbDeathPenalty" Margin="0,3,0,0" Height="25" FontSize="14 px" VerticalContentAlignment="Center" Content="Disable Runes loss on death" ToolTip="Disables Runes loss upon death" IsChecked="{Binding Source={x:Static p:Settings.Default}, Path=DisablePenaltyTicked, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" TabIndex="16" />
+                            <CheckBox x:Name="cbDeathPenalty" Margin="0,3,0,0" Height="25" FontSize="14 px" VerticalContentAlignment="Center" Content="Disable Runes loss on death" ToolTip="Disables Runes loss upon death" IsChecked="{Binding DisablePenaltyTicked, Mode=TwoWay, Source={x:Static p:Settings.Default}, UpdateSourceTrigger=PropertyChanged}" TabIndex="16" />
                             <DockPanel Margin="0,3,0,0" LastChildFill="False">
-                                <CheckBox x:Name="cbGameSpeed" DockPanel.Dock="Left" Margin="0,0,0,0" Height="25" FontSize="14 px" VerticalContentAlignment="Center" Content="Game speed (%):" ToolTip="Increase or decrease. Can potentially crash the game in cutscenes, use with caution" IsChecked="{Binding Source={x:Static p:Settings.Default}, Path=GameSpeedTicked, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" TabIndex="18"  />
+                                <CheckBox x:Name="cbGameSpeed" DockPanel.Dock="Left" Margin="0,0,0,0" Height="25" FontSize="14 px" VerticalContentAlignment="Center" Content="Game speed (%):" ToolTip="Increase or decrease. Can potentially crash the game in cutscenes, use with caution" IsChecked="{Binding GameSpeedTicked, Mode=TwoWay, Source={x:Static p:Settings.Default}, UpdateSourceTrigger=PropertyChanged}" TabIndex="18"  />
                                 <Button x:Name="bGs100" DockPanel.Dock="Right" Content="100" Margin="0,0,0,0" Width="30" Height="25" FontSize="14 px" BorderThickness="1" Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}" Focusable="False" Click="BGs100_Click" />
                                 <Button x:Name="bGsHigher" DockPanel.Dock="Right" Content="&gt;" Margin="0,0,3,0" Width="25" Height="25" FontSize="14 px" BorderThickness="1" Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}" Focusable="False" Click="BGsHigher_Click" />
-                                <TextBox x:Name="tbGameSpeed" DockPanel.Dock="Right" Margin="0,0,3,0" Width="30" Height="25" FontSize="14 px" VerticalContentAlignment="Center" Text="{Binding Source={x:Static p:Settings.Default}, Path=GameSpeed, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" TextAlignment="Center" MaxLength="3" TabIndex="19" />
+                                <TextBox x:Name="tbGameSpeed" DockPanel.Dock="Right" Margin="0,0,3,0" Width="30" Height="25" FontSize="14 px" VerticalContentAlignment="Center" Text="{Binding GameSpeed, Mode=TwoWay, Source={x:Static p:Settings.Default}, UpdateSourceTrigger=PropertyChanged}" TextAlignment="Center" MaxLength="3" TabIndex="19" />
                                 <Button x:Name="bGsLower" DockPanel.Dock="Right" Content="&lt;" Margin="0,0,3,0" Width="25" Height="25" FontSize="14 px" BorderThickness="1" Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}" Focusable="False" Click="BGsLower_Click" />
                             </DockPanel>
                         </StackPanel>
                     </Grid>
                 </Expander>
-                <Button x:Name="bStart" Margin="0,7,0,0" Width="300" Height="30" FontSize="14 px" IsEnabled="False" Content="Start game" BorderThickness="1" Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}" 
+                <Button x:Name="bStart" Margin="0,7,0,0" Width="300" Height="30" FontSize="14 px" IsEnabled="False" Content="Start game without EAC" BorderThickness="1" Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}" 
                     Focusable="False" TabIndex="20" IsTabStop="False" Click="bStart_Click" />
                 <Button x:Name="bPatch" Margin="0,7,0,0" Width="300" Height="30" FontSize="14 px" IsEnabled="False" Content="Patch game" BorderThickness="1" Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}" 
                     Focusable="False" TabIndex="20" IsTabStop="False" Click="bPatch_Click" />
@@ -44,17 +47,18 @@
                 <Expander x:Name="exGuide" Margin="0,8,0,0" Height="Auto" FontSize="14 px" Header="ReadMe" IsExpanded="True" TabIndex="22">
                     <TextBlock Margin="2,6,2,0" FontSize="11 px" TextWrapping="WrapWithOverflow" IsEnabled="False">
                         <TextBlock.Inlines>
-                            <Run FontWeight="Bold" Foreground="#FFF00000">DON'T RUN THIS IN ONLINE MODE OR WITH EAC ENABLED!</Run>
+                            <Run FontWeight="Bold" Foreground="#FFF00000">DON'T RUN THIS IN ONLINE MODE OR WITH EAC!</Run>
                             <Run FontWeight="Bold" Foreground="#FF0046FF">This patcher does not modify game files, you have to start it every time.</Run>
-                            <Run FontWeight="Bold">Use</Run>
-                            <Run FontWeight="Bold" Foreground="#FFF00000">borderless windowed mode and force disable VSYNC</Run>
-                            <Run FontWeight="Bold">with Nvidia Control panel or AMD Radeon Settings to get frame rate unlock working.</Run>
+                            <Run FontWeight="Bold">You can use fullscreen or borderless windowed mode for frame rate unlock. However</Run>
+                            <Run FontWeight="Bold" Foreground="#FFF00000">if your monitor doesn't support GSYNC/FreeSync you'll have to force disable VSYNC</Run>
+                            <Run FontWeight="Bold">with Nvidia Control panel or AMD Radeon Settings.</Run>
+                            <Run FontWeight="Bold">Widescreen support adds your monitors native resolution to the game options.</Run>
                         </TextBlock.Inlines>
                     </TextBlock>
                 </Expander>
                 <Label HorizontalAlignment="Right" FontSize="12 px" TabIndex="22">
-                    <Hyperlink NavigateUri="https://github.com/uberhalit/EldenRingFpsUnlockAndMore" RequestNavigate="Hyperlink_RequestNavigate">
-                        v0.0.0.4-beta - by uberhalit
+                    <Hyperlink NavigateUri="https://github.com/uberhalit/EldenRingFpsUnlockAndMore" RequestNavigate="Hyperlink_RequestNavigate" Cursor="Hand">
+                        v0.0.0.5-beta - by uberhalit
                     </Hyperlink>
                 </Label>
             </StackPanel>

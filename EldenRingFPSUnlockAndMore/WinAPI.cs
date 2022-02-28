@@ -31,5 +31,27 @@ namespace EldenRingFPSUnlockAndMore
             [In, Out] Byte[] lpBuffer,
             UInt64 dwSize,
             out IntPtr lpNumberOfBytesWritten);
+
+        [DllImport("user32.dll")]
+        internal static extern IntPtr GetDC(IntPtr hWnd);
+
+        [DllImport("gdi32.dll")]
+        internal static extern Int32 GetDeviceCaps(IntPtr hdc, DeviceCap nIndex);
+
+        public enum DeviceCap : Int32
+        {
+            /// <summary>
+            /// Horizontal width in pixels
+            /// </summary>
+            HORZRES = 8,
+            /// <summary>
+            /// Vertical height in pixels
+            /// </summary>
+            VERTRES = 10,
+            /// <summary>
+            /// Current vertical refresh rate of the display device (for displays only) in Hz
+            /// </summary>
+            VREFRESH = 116
+        }
     }
 }

@@ -29,5 +29,8 @@
     <Setting Name="GameName" Type="System.String" Scope="User">
       <Value Profile="(Default)">eldenring</Value>
     </Setting>
+    <Setting Name="WidescreenTicked" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">False</Value>
+    </Setting>
   </Settings>
 </SettingsFile>
