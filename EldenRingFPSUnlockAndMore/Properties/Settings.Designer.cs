@@ -142,35 +142,5 @@ namespace EldenRingFPSUnlockAndMore.Properties {
                 this["WidescreenTicked"] = value;
             }
         }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("False")]
-        public bool SteamTicked
-        {
-            get
-            {
-                return ((bool)(this["SteamTicked"]));
-            }
-            set
-            {
-                this["SteamTicked"] = value;
-            }
-        }
-
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("False")]
-        public bool HostsTicked
-        {
-            get
-            {
-                return ((bool)(this["HostsTicked"]));
-            }
-            set
-            {
-                this["HostsTicked"] = value;
-            }
-        }
     }
 }
