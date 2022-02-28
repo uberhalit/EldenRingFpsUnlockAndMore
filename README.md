@@ -1,6 +1,3 @@
-# BETA-RELEASE
-Please make sure your game is set to offline and you start the game without EAC through the utility.
-
 # Elden Ring FPS Unlocker and more
 A small utility to remove frame rate limit, change FOV (Field of View), add widescreen supprt, alter Game Speed and various game modifications for [Elden Ring](https://en.bandainamcoent.eu/elden-ring/elden-ring) written in C#. More features soon!
 Patches games memory while running, does not modify any game files. Works with every game version (legit steam & oh-not-so-legit), should work with all future updates.
@@ -19,12 +16,17 @@ Patches games memory while running, does not modify any game files. Works with e
   * global game speed modifier (increase or decrease)
   * disable losing Runes on death
 
+## Preview
+[![Elden Ring FPS Unlocker and more](https://user-images.githubusercontent.com/19159295/156041448-ba5e08df-bb5e-4ac7-a8f0-772d8f039f76.png)](#)
+
 ## Usage
+**Make sure the game is running in offline mode and the AntiCheat (EAC) isn't running.**. 
+
 The graphic setup has to be done only once but as the patcher hot-patches the memory **you have to start the patcher every time you want to use any of its features**.
 The game enforces VSYNC and forces 60 Hz in fullscreen even on 144 Hz monitors so we have to override these.
 
-#### Nvidia: Use Nvidia Control Panel to set 'Preferred Refreshrate' to 'Highest available' on a Elden Ring Profile, if you aren't using GSYNC/FreeSYNC then set 'Vsync' to 'Off'.
-#### AMD: Use Radeon Settings to set 'Wait for Vertical Refresh' to 'Enhanced Sync' of 'Fast Sync' on a Elden Ring profile.
+#### **Nvidia**: Use Nvidia Control Panel to set 'Preferred Refreshrate' to 'Highest available' on a Elden Ring Profile, if you aren't using GSYNC/FreeSYNC then set 'Vsync' to 'Off'.
+#### **AMD**: Use Radeon Settings to set 'Wait for Vertical Refresh' to 'Enhanced Sync', 'Fast Sync' or 'Always Off' on a Elden Ring profile.
 
 ### Follow these steps on Nvidia (see below for GSYNC):
 1. Open Nvidia Control Panel
@@ -119,6 +121,12 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 * game speed modification can potentially crash the game in certain cutscenes and NPC interactions, use with caution
 
 ## Version History
+* v1.0.0.0 (2022-02-28)
+  * fixed issue with widescreen support not setting correct aspect ratio
+  * made game start-up and checks more robust
+  * fixed an issue with game start-up on certain systems
+  * disabling runes loss upon death will now no longer drop the runes you didn't loose onto the ground
+  * better cleanup on exit
 * v0.0.0.5-beta (2022-02-27)
   * frame rate unlock now removes 60 Hz lock in fullscreen too (screw you FromSoft!)
   * added widescreen support patch

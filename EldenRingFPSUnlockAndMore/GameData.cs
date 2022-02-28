@@ -6,9 +6,10 @@ namespace EldenRingFPSUnlockAndMore
     {
         internal const string PROCESS_TITLE = "Elden Ring";
         internal const string PROCESS_DESCRIPTION = "elden";
-        internal static readonly string[] PROCESS_EXE_VERSION_SUPPORTED = new string[1]
+        internal static readonly string[] PROCESS_EXE_VERSION_SUPPORTED = new string[]
         {
-            "1.2.0.0"
+            "1.2.0.0",
+            "1.2.1.0"
         };
 
         /**
@@ -93,17 +94,19 @@ namespace EldenRingFPSUnlockAndMore
 
 
         /**
-            Here Runes get reduced in case of death, so we nop the two instructions.
-            00007FF70A1FC554 | 44:896C24 2C               | mov dword ptr ss:[rsp+2C],r13d                                 |
-            00007FF70A1FC559 | 8B00                       | mov eax,dword ptr ds:[rax]                                     | prepare reduction amount
-            00007FF70A1FC55B | 8945 6C                    | mov dword ptr ss:[rbp+6C],eax                                  | reduces player runes
-            00007FF70A1FC55E | 48:8B0D 53646703           | mov rcx,qword ptr ds:[7FF70D8729B8]                            |
-            00007FF70A1FC565 | 48:85C9                    | test rcx,rcx                                                   |
+            Here Runes get reduced in case of death, so we skip the function call.
+            00007FF64A420CCB | 41:B0 01                   | mov r8b,1                                                      |
+            00007FF64A420CCE | 48:8BD3                    | mov rdx,rbx                                                    |
+            00007FF64A420CD1 | E8 AAB60500                | call eldenring.7FF64A47C380                                    | call DecreaseRunes()
+            00007FF64A420CD6 | 48:8B5C24 20               | mov rbx,qword ptr ss:[rsp+20]                                  |
+            00007FF64A420CDB | 32C0                       | xor al,al                                                      |
+            00007FF64A420CDD | 48:83C4 28                 | add rsp,28                                                     |
+            00007FF64A420CE1 | C3                         | ret                                                            |
 
-            00007FF70A1FC559 (Version 1.2.0.0)
+            00007FF64A420CD1 (Version 1.2.1.0)
          */
-        internal const string PATTERN_DEATHPENALTY = "44 ?? ?? ?? ?? 8B 00 89 45 ?? 48 8B 0D";
-        internal const int PATTERN_DEATHPENALTY_OFFSET = 5;
+        internal const string PATTERN_DEATHPENALTY = "41 ?? 01 48 ?? ?? E8 ?? ?? ?? ?? 48";
+        internal const int PATTERN_DEATHPENALTY_OFFSET = 6;
         internal const int PATCH_DEATHPENALTY_INSTRUCTION_LENGTH = 5;
         internal static readonly byte[] PATCH_DEATHPENALTY_ENABLE = new byte[] { 0x90, 0x90, 0x90, 0x90, 0x90 }; // nop
 

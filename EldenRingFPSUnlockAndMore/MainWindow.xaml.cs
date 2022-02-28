@@ -13,11 +13,18 @@ using System.ComponentModel;
 using System.Linq;
 using System.Management;
 using System.Text.RegularExpressions;
+using System.Collections.Generic;
+using System.Security.Principal;
 
 namespace EldenRingFPSUnlockAndMore
 {
     public partial class MainWindow : Window
     {
+        internal Process _gameProc;
+        internal IntPtr _gameHwnd = IntPtr.Zero;
+        internal IntPtr _gameAccessHwnd = IntPtr.Zero;
+        internal static IntPtr _gameAccessHwndStatic;
+
         internal long _offset_framelock = 0x0;
         internal long _offset_hertzlock = 0x0;
         internal long _offset_resolution = 0x0;
@@ -35,16 +42,23 @@ namespace EldenRingFPSUnlockAndMore
         internal const string _DATACAVE_FOV_MULTIPLIER = "dfovMultiplier";
         internal const string _CODECAVE_FOV_MULTIPLIER = "cfovMultiplier";
 
+        /// <summary>
+        /// Path to logs file.
+        /// </summary>
         internal static string _path_logs;
-        internal Process _gameProc;
-        internal IntPtr _gameHwnd = IntPtr.Zero;
-        internal IntPtr _gameAccessHwnd = IntPtr.Zero;
-        internal static IntPtr _gameAccessHwndStatic;
-        internal static bool _startup = true;
+
+        /// <summary>
+        /// Determines if game is currently being started up.
+        /// </summary>
+        internal static bool _startup = false;
+
+        /// <summary>
+        /// Determines if our functionality is up and running.
+        /// </summary>
         internal static bool _running = false;
 
         internal MemoryCaveGenerator _memoryCaveGenerator;
-        internal readonly DispatcherTimer _dispatcherTimerGameCheck = new DispatcherTimer();
+        internal readonly DispatcherTimer _dispatcherTimerGameCheck = new DispatcherTimer(DispatcherPriority.Send);
         internal readonly BackgroundWorker _bgwScanGame = new BackgroundWorker();
 
         public MainWindow()
@@ -70,17 +84,19 @@ namespace EldenRingFPSUnlockAndMore
             }
             GC.KeepAlive(mutex);
 
+            if (!IsAdministrator())
+            {
+                MessageBox.Show("Please run this utility as administrator!", "Elden Ring FPS Unlocker and more", MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                Environment.Exit(0);
+            }
+
             _bgwScanGame.DoWork += new DoWorkEventHandler(ReadGame);
             _bgwScanGame.RunWorkerCompleted += new RunWorkerCompletedEventHandler(OnReadGameFinish);
 
             _dispatcherTimerGameCheck.Tick += new EventHandler(async (object s, EventArgs a) =>
             {
                 if (_startup)
-                {
-                    _startup = false;
-                    UpdateStatus("waiting for game...", Brushes.White);
-                    bStart.IsEnabled = true;
-                }
+                    return;
                 bool result = await CheckGame();
                 if (result)
                 {
@@ -89,19 +105,59 @@ namespace EldenRingFPSUnlockAndMore
                     _dispatcherTimerGameCheck.Stop();
                 }
             });
-            _dispatcherTimerGameCheck.Interval = new TimeSpan(0, 0, 0, 0, 1000);
-            _dispatcherTimerGameCheck.Start();
+            _dispatcherTimerGameCheck.Interval = new TimeSpan(0, 0, 0, 0, 2000);
+
+            ResetGame();
+            bStart.IsEnabled = true;
         }
 
         /// <summary>
-        /// Check if game is running.
+        /// On window closing.
         /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void Window_Closing(object sender, CancelEventArgs e)
+        {
+            // save all settings
+            Properties.Settings.Default.Save();
+
+            // cleanup
+            if (_gameAccessHwnd != IntPtr.Zero)
+                WinAPI.CloseHandle(_gameAccessHwnd);
+            string steamIdPath = Path.Combine(Path.GetDirectoryName(Properties.Settings.Default.GamePath), "steam_appid.txt");
+            if (File.Exists(steamIdPath))
+            {
+                try
+                {
+                    File.Delete(steamIdPath);
+                }
+                catch { }
+            }
+        }
+
+        /// <summary>
+        /// Check if game is running, if not start game.
+        /// </summary>
+        /// <returns>True if the game is responding and running.<returns>
         private async Task<bool> CheckGame()
         {
             // check for game
             var procList = Process.GetProcessesByName(Properties.Settings.Default.GameName);
             if (!procList.Any() || procList[0].HasExited) 
                 return false;
+
+            // make sure game isn't in half-dead state
+            int timeout = 0;
+            while (!procList[0].Responding)
+            {
+                UpdateStatus("game not responding...", Brushes.White);
+                if (timeout > 10000)
+                    break;
+
+                procList[0].Refresh();
+                await Task.Delay(500);
+                timeout += 500;
+            }
 
             // check if game is running without EAC
             //var procArgs = GetCommandLineOfProcess(procList[0]);
@@ -157,12 +213,13 @@ namespace EldenRingFPSUnlockAndMore
                     return true;
                 }
                 if (!procList[0].Responding)
-                    await Task.Delay(5000);
+                    await Task.Delay(2500);
                 if (procList[0].HasExited)
                 {
-                    await Task.Delay(2500);
+                    await Task.Delay(500);
                     return false;
                 }
+                procList[0].Refresh();
                 if (procList[0].Responding && !procList[0].HasExited)
                     return await OpenGame();
             }
@@ -170,31 +227,11 @@ namespace EldenRingFPSUnlockAndMore
         }
 
         /// <summary>
-        /// Open a prompt to let user choose game installation path.
-        /// </summary>
-        /// <returns>The choosen file location.<returns>
-        private string PromptForGamePath()
-        {
-            MessageBox.Show("Couldn't find game installation path!\n\n" +
-                            "Please specify the installation path yourself...", "Elden Ring FPS Unlocker and more", MessageBoxButton.OK, MessageBoxImage.Exclamation);
-            string gameExePath = OpenFile("Select eldenring.exe", "C:\\", new[] { "*.exe" }, new[] { "Elden Ring Executable" }, true);
-            if (string.IsNullOrEmpty(gameExePath) || !File.Exists(gameExePath))
-                Environment.Exit(0);
-            var fileInfo = FileVersionInfo.GetVersionInfo(gameExePath);
-            if (!fileInfo.FileDescription.ToLower().Contains(GameData.PROCESS_DESCRIPTION))
-            {
-                MessageBox.Show("Invalid game file!", "Elden Ring FPS Unlocker and more", MessageBoxButton.OK, MessageBoxImage.Exclamation);
-                Environment.Exit(0);
-            }
-            Properties.Settings.Default.GameName = Path.GetFileNameWithoutExtension(gameExePath);
-            return gameExePath;
-        }
-
-        /// <summary>
         /// Starts the game (and steam) in offline mode without EAC.
         /// </summary>
         private async Task SafeStartGame(string path = null)
         {
+            _startup = true;
             UpdateStatus("starting game...", Brushes.Orange);
 
             // get game path
@@ -272,36 +309,14 @@ namespace EldenRingFPSUnlockAndMore
             await WaitForProgram(Properties.Settings.Default.GameName, 10000);
             await Task.Delay(4000);
             procGameStarter.Close();
+            _startup = false;
         }
 
         /// <summary>
-        /// Waits a set timeout for a process to appear.
+        /// Opens the game for full memory access.
         /// </summary>
-        /// <param name="appName">The process to look for.</param>
-        /// <param name="timeout"></param>
-        /// <returns></returns>
-        private async Task<bool> WaitForProgram(string appName, int timeout = 5000)
-        {
-            int timePassed = 0;
-            while (true)
-            {
-                Process[] procList = Process.GetProcessesByName(appName);
-                foreach (Process proc in procList)
-                {
-                    if (proc.ProcessName == appName)
-                        return true;
-                }
-
-                await Task.Delay(500);
-                timePassed += 500;
-                if (timePassed > timeout)
-                    return false;
-            }
-        }
-
-        /// <summary>
-        /// Opens the game for full access.
-        /// </summary>
+        /// <param name="retry">Indicates if a single retry for access should be executed.</param>
+        /// <returns>True if access has been granted.</returns>
         private async Task<bool> OpenGame(bool retry = false)
         {
             UpdateStatus("accessing game...", Brushes.Orange);
@@ -324,6 +339,7 @@ namespace EldenRingFPSUnlockAndMore
                 LogToFile($"hWnd: {_gameHwnd:X}");
                 LogToFile($"Access hWnd: {_gameAccessHwnd}:X");
                 LogToFile($"BaseAddress: {_gameProc.MainModule.BaseAddress:X}");
+                LogToFile($"Responding: {_gameProc.Responding}");
                 if (!retry)
                 {
                     await Task.Delay(5000);
@@ -493,7 +509,7 @@ namespace EldenRingFPSUnlockAndMore
         }
 
         /// <summary>
-        /// Determines whether everything is ready for patching.
+        /// Determines whether everything is ready for patching. If not, resets the game data.
         /// </summary>
         /// <returns>True if we can patch game, false otherwise.</returns>
         private bool CanPatchGame()
@@ -501,8 +517,8 @@ namespace EldenRingFPSUnlockAndMore
             if (!_running) 
                 return false;
 
-            Process[] processlist = Process.GetProcesses();
-            if (!_gameProc.HasExited && processlist.Any(p => p.Id == _gameProc.Id)) 
+            _gameProc.Refresh();
+            if (!_gameProc.HasExited && _gameProc.Responding) 
                 return true;
 
             ResetGame();
@@ -528,7 +544,7 @@ namespace EldenRingFPSUnlockAndMore
             _offset_resolution_scaling_fix = 0x0;
             _offset_deathpenalty = 0x0;
             _offset_timescale = 0x0;
-            _startup = true;
+            _startup = false;
             _patch_hertzlock_disable = null;
             _patch_deathpenalty_disable = null;
             _patch_resolution_enable = null;
@@ -542,6 +558,8 @@ namespace EldenRingFPSUnlockAndMore
             cbDeathPenalty.IsEnabled = true;
             cbGameSpeed.IsEnabled = true;
             bPatch.IsEnabled = false;
+
+            UpdateStatus("waiting for game...", Brushes.White);
             _dispatcherTimerGameCheck.Start();
         }
 
@@ -550,14 +568,16 @@ namespace EldenRingFPSUnlockAndMore
         /// </summary>
         private void PatchGame()
         {
+            List<bool> results = new List<bool>();
             if (!CanPatchGame())
                 return;
-            PatchFramelock();
-            PatchFov();
-            PatchWidescreen();
-            PatchDeathPenalty();
-            PatchGameSpeed();
-            UpdateStatus("game patched!", Brushes.Green);
+            results.Add(PatchFramelock());
+            results.Add(PatchFov());
+            results.Add(PatchWidescreen());
+            results.Add(PatchDeathPenalty());
+            results.Add(PatchGameSpeed());
+            if (results.Contains(true))
+                UpdateStatus("game patched!", Brushes.Green);
         }
 
         /// <summary>
@@ -707,6 +727,15 @@ namespace EldenRingFPSUnlockAndMore
         }
 
         /// <summary>
+        /// Checks if the user has called this application as administrator.
+        /// </summary>
+        /// <returns>True if application is running as administrator.</returns>
+        private static bool IsAdministrator()
+        {
+            return new WindowsPrincipal(WindowsIdentity.GetCurrent()).IsInRole(WindowsBuiltInRole.Administrator);
+        }
+
+        /// <summary>
         /// Gets the install path of an application.
         /// </summary>
         /// <param name="p_name">The full name of the application from control panel.</param>
@@ -799,13 +828,59 @@ namespace EldenRingFPSUnlockAndMore
         }
 
         /// <summary>
+        /// Open a prompt to let user choose game installation path.
+        /// </summary>
+        /// <returns>The choosen file location.<returns>
+        private string PromptForGamePath()
+        {
+            MessageBox.Show("Couldn't find game installation path!\n\n" +
+                            "Please specify the installation path yourself...", "Elden Ring FPS Unlocker and more", MessageBoxButton.OK, MessageBoxImage.Exclamation);
+            string gameExePath = OpenFile("Select eldenring.exe", "C:\\", new[] { "*.exe" }, new[] { "Elden Ring Executable" }, true);
+            if (string.IsNullOrEmpty(gameExePath) || !File.Exists(gameExePath))
+                Environment.Exit(0);
+            var fileInfo = FileVersionInfo.GetVersionInfo(gameExePath);
+            if (!fileInfo.FileDescription.ToLower().Contains(GameData.PROCESS_DESCRIPTION))
+            {
+                MessageBox.Show("Invalid game file!", "Elden Ring FPS Unlocker and more", MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                Environment.Exit(0);
+            }
+            Properties.Settings.Default.GameName = Path.GetFileNameWithoutExtension(gameExePath);
+            return gameExePath;
+        }
+
+        /// <summary>
+        /// Waits a set timeout for a process to appear.
+        /// </summary>
+        /// <param name="appName">The process to look for.</param>
+        /// <param name="timeout">The maximum amount of time in milliseconds to wait for.</param>
+        /// <returns>True if process showed up before timeout passed.</returns>
+        private async Task<bool> WaitForProgram(string appName, int timeout = 5000)
+        {
+            int timePassed = 0;
+            while (true)
+            {
+                Process[] procList = Process.GetProcessesByName(appName);
+                foreach (Process proc in procList)
+                {
+                    if (proc.ProcessName == appName && proc.Responding)
+                        return true;
+                }
+
+                await Task.Delay(500);
+                timePassed += 500;
+                if (timePassed > timeout)
+                    return false;
+            }
+        }
+
+        /// <summary>
         /// Gets DPI-clean resolution of the primary screen. 
         /// </summary>
         /// <returns></returns>
         private Size GetDpiSafeResolution()
         {
             IntPtr hwnd = WinAPI.GetDC(IntPtr.Zero);
-            return new Size(WinAPI.GetDeviceCaps(hwnd, WinAPI.DeviceCap.VERTRES), WinAPI.GetDeviceCaps(hwnd, WinAPI.DeviceCap.HORZRES));
+            return new Size(WinAPI.GetDeviceCaps(hwnd, WinAPI.DeviceCap.HORZRES), WinAPI.GetDeviceCaps(hwnd, WinAPI.DeviceCap.VERTRES));
 
             // Requires dpiAware in manifest.
             //PresentationSource presentationSource = PresentationSource.FromVisual(this);
@@ -928,26 +1003,12 @@ namespace EldenRingFPSUnlockAndMore
         }
 
         /// <summary>
-        /// On window closing.
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void Window_Closing(object sender, CancelEventArgs e)
-        {
-            // save all settings
-            Properties.Settings.Default.Save();
-
-            if (_gameAccessHwnd != IntPtr.Zero)
-                WinAPI.CloseHandle(_gameAccessHwnd);
-        }
-
-        /// <summary>
         /// Logs messages to log file.
         /// </summary>
         /// <param name="msg">The message to write to file.</param>
         internal static void LogToFile(string msg)
         {
-            string timedMsg = "[" + DateTime.Now + "] " + msg;
+            string timedMsg = $"[{DateTime.Now:HH:mm:ss}] {msg}";
             Debug.WriteLine(timedMsg);
             try
             {
@@ -958,7 +1019,7 @@ namespace EldenRingFPSUnlockAndMore
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Writing to log file failed: " + ex.Message, "Sekiro Fps Unlock And More");
+                MessageBox.Show($"Writing to log file failed: {ex.Message}", "Elden Ring Fps Unlock And More");
             }
         }
 
@@ -970,8 +1031,11 @@ namespace EldenRingFPSUnlockAndMore
         private void UpdateStatus(string text, Brush color)
         {
             tbStatus.Background = color;
-            tbStatus.Text = $"{DateTime.Now.ToString("HH:mm:ss")} {text}";
+            Debug.WriteLine($"[{DateTime.Now:HH:mm:ss}] {text}");
+            tbStatus.Text = $"{DateTime.Now:HH:mm:ss} {text}";
         }
+
+        #region EventHandler
 
         private void Hyperlink_RequestNavigate(object sender, System.Windows.Navigation.RequestNavigateEventArgs e)
         {
@@ -1049,5 +1113,7 @@ namespace EldenRingFPSUnlockAndMore
             if (cbGameSpeed.IsChecked == true) 
                 PatchGameSpeed();
         }
+
+        #endregion
     }
 }
