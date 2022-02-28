@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Windows;
 using System.Threading;
 using System.Windows.Media;
@@ -13,6 +13,7 @@ using System.ComponentModel;
 using System.Linq;
 using System.Management;
 using System.Text.RegularExpressions;
+using System.Security.Principal;
 
 namespace EldenRingFPSUnlockAndMore
 {
@@ -57,6 +58,15 @@ namespace EldenRingFPSUnlockAndMore
         /// </summary>
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
+            WindowsPrincipal principal = new WindowsPrincipal(WindowsIdentity.GetCurrent());
+            bool administrativeMode = principal.IsInRole(WindowsBuiltInRole.Administrator);
+
+            if (!administrativeMode)
+            {
+                MessageBox.Show("Please run as Administrator!", "Elden Ring FPS Unlocker and more", MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                Environment.Exit(0);
+            }
+
             string local = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
             _path_logs = Path.Combine(local, "EldenRingFPSUnlockAndMore", "logs.log");
             if (!Directory.Exists(Path.Combine(local, "EldenRingFPSUnlockAndMore")))
@@ -231,23 +241,26 @@ namespace EldenRingFPSUnlockAndMore
                 Environment.Exit(0);
             }
 
-            // start steam
-            Process[] procList = Process.GetProcessesByName("steam");
-            if (procList.Length == 0)
+            if (cbSteam.IsChecked == true)
             {
-                ProcessStartInfo siSteam = new ProcessStartInfo
+                // start steam
+                Process[] procList = Process.GetProcessesByName("steam");
+                if (procList.Length == 0)
                 {
-                    WindowStyle = ProcessWindowStyle.Minimized,
-                    Verb = "open",
-                    FileName = "steam://open/console",
-                };
-                Process procSteam = new Process
-                {
-                    StartInfo = siSteam
-                };
-                procSteam.Start();
-                await WaitForProgram("steam", 6000);
-                await Task.Delay(4000);
+                    ProcessStartInfo siSteam = new ProcessStartInfo
+                    {
+                        WindowStyle = ProcessWindowStyle.Minimized,
+                        Verb = "open",
+                        FileName = "steam://open/console",
+                    };
+                    Process procSteam = new Process
+                    {
+                        StartInfo = siSteam
+                    };
+                    procSteam.Start();
+                    await WaitForProgram("steam", 6000);
+                    await Task.Delay(4000);
+                }
             }
 
             // start the game
@@ -552,7 +565,45 @@ namespace EldenRingFPSUnlockAndMore
             PatchWidescreen();
             PatchDeathPenalty();
             PatchGameSpeed();
+            PatchHosts();
             UpdateStatus("game patched!", Brushes.Green);
+        }
+
+        /// <summary>
+        /// Patch the windows hosts file to block epicgames.
+        /// </summary>
+        private bool PatchHosts()
+        {
+            string hosts = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.System), "drivers/etc/hosts");
+
+            if (!cbHost.IsEnabled) return false;
+            if (cbHost.IsChecked == true)
+            {
+                Regex regex = new Regex(@".*api.epicgames.dev.*");
+
+                using (StreamReader r = new StreamReader(hosts))
+                {
+                    string line;
+                    while ((line = r.ReadLine()) != null)
+                    {
+                        Match match = regex.Match(line);
+                        if (match.Success)
+                        {
+                            r.Close();
+                            UpdateStatus("HOSTS already patched!", Brushes.Red);
+                            return false;
+                        }
+                    }
+                }
+
+                using (StreamWriter w = File.AppendText(hosts))
+                {
+                    w.WriteLine("127.0.0.1 api.epicgames.dev");
+                    w.Close();
+                    UpdateStatus("Patched HOSTS!", Brushes.Green);
+                }
+            }
+            return true;
         }
 
         /// <summary>
@@ -953,7 +1004,7 @@ namespace EldenRingFPSUnlockAndMore
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Writing to log file failed: " + ex.Message, "Sekiro Fps Unlock And More");
+                MessageBox.Show("Writing to log file failed: " + ex.Message, "Elden Ring Fps Unlock And More");
             }
         }
 
@@ -1043,6 +1094,16 @@ namespace EldenRingFPSUnlockAndMore
             tbGameSpeed.Text = "100";
             if (cbGameSpeed.IsChecked == true) 
                 PatchGameSpeed();
+        }
+        private void cbSteam_Checked(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void cbHost_Checked(object sender, RoutedEventArgs e)
+        {
+            if (cbHost.IsChecked == true)
+                PatchHosts();
         }
     }
 }
