@@ -1,4 +1,4 @@
-﻿<Window x:Class="EldenRingFPSUnlockAndMore.MainWindow"
+<Window x:Class="EldenRingFPSUnlockAndMore.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -11,6 +11,10 @@
     <Grid x:Name="gMainGrid" Background="#FFF9F9F9">
         <DockPanel>
             <StackPanel DockPanel.Dock="Top" Margin="10,10,10,0" Width="300" Height="Auto">
+                <DockPanel LastChildFill="False">
+                    <CheckBox x:Name="cbSteam" DockPanel.Dock="Left" Margin="0,0,0,0" Height="25" FontSize="14 px" VerticalContentAlignment="Center" Content="Enable Steam" ToolTip="Steam Console Enabled?" IsChecked="{Binding Source={x:Static p:Settings.Default}, Path=SteamTicked, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" TabIndex="1" Checked="cbSteam_Checked" />
+                    <CheckBox x:Name="cbHost" DockPanel.Dock="Right" Margin="0,0,0,0" Height="25" FontSize="14 px" VerticalContentAlignment="Center" Content="Patch Hosts" ToolTip="Patch Hosts File?" IsChecked="{Binding Source={x:Static p:Settings.Default}, Path=HostsTicked, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" TabIndex="1" Checked="cbHost_Checked" />
+                </DockPanel>
                 <DockPanel LastChildFill="False">
                     <CheckBox x:Name="cbFramelock" DockPanel.Dock="Left" Margin="0,0,0,0" Height="25" FontSize="14 px" VerticalContentAlignment="Center" Content="Frame rate lock:" ToolTip="Make sure to read the guide" IsChecked="{Binding FrameLockTicked, Source={x:Static p:Settings.Default}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" TabIndex="1" />
                     <TextBox x:Name="tbFramelock" DockPanel.Dock="Right" Margin="0,0,0,0" Width="116" Height="25" FontSize="14 px" VerticalContentAlignment="Center" Text="{Binding FrameLock, Source={x:Static p:Settings.Default}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" MaxLength="3" TabIndex="2" />
