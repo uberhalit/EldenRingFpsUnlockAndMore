@@ -201,8 +201,7 @@ namespace EldenRingFPSUnlockAndMore
             string gameExePath = Properties.Settings.Default.GamePath;
             string gamePath;
 
-            var fileInfo = FileVersionInfo.GetVersionInfo(gameExePath);
-            if (!File.Exists(gameExePath) || !fileInfo.FileDescription.ToLower().Contains(GameData.PROCESS_DESCRIPTION))
+            if (!File.Exists(gameExePath))
             {
                 gamePath = path ?? GetApplicationPath("ELDEN RING");
                 if (gamePath == null || (!File.Exists(Path.Combine(gamePath, $"{Properties.Settings.Default.GameName}.exe")) && !File.Exists(Path.Combine(gamePath, "GAME", $"{Properties.Settings.Default.GameName}.exe"))))
@@ -216,6 +215,12 @@ namespace EldenRingFPSUnlockAndMore
                     else
                         gameExePath = PromptForGamePath();
                 }
+            }
+            else
+            {
+                var fileInfo = FileVersionInfo.GetVersionInfo(gameExePath);
+                if (!fileInfo.FileDescription.ToLower().Contains(GameData.PROCESS_DESCRIPTION))
+                    gameExePath = PromptForGamePath();
             }
             Properties.Settings.Default.GamePath = gameExePath;
             gamePath = Path.GetDirectoryName(gameExePath);

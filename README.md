@@ -14,7 +14,7 @@ Patches games memory while running, does not modify any game files. Works with e
 * unlock frame rate (remove FPS limit)
 * remove forced 60 Hertz (Hz) limit in fullscreen
 * increase or decrease field of view (FOV)
-* add support for widesscreen monitors
+* add support for widescreen monitors
 * game modifications
   * global game speed modifier (increase or decrease)
   * disable losing Runes on death
