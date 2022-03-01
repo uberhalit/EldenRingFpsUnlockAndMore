@@ -105,7 +105,7 @@ namespace EldenRingFPSUnlockAndMore
 
             00007FF64A420CD1 (Version 1.2.1.0)
          */
-        internal const string PATTERN_DEATHPENALTY = "41 ?? 01 48 ?? ?? E8 ?? ?? ?? ?? 48";
+        internal const string PATTERN_DEATHPENALTY = "41 ?? 01 48 ?? ?? E8 ?? ?? ?? ?? 48 ?? ?? ?? ?? 32 C0";
         internal const int PATTERN_DEATHPENALTY_OFFSET = 6;
         internal const int PATCH_DEATHPENALTY_INSTRUCTION_LENGTH = 5;
         internal static readonly byte[] PATCH_DEATHPENALTY_ENABLE = new byte[] { 0x90, 0x90, 0x90, 0x90, 0x90 }; // nop

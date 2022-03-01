@@ -121,6 +121,8 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 * game speed modification can potentially crash the game in certain cutscenes and NPC interactions, use with caution
 
 ## Version History
+* v1.0.0.1 (2022-02-28)
+  * fixed an issue with pattern on 'disabling runes loss'
 * v1.0.0.0 (2022-02-28)
   * fixed issue with widescreen support not setting correct aspect ratio
   * made game start-up and checks more robust

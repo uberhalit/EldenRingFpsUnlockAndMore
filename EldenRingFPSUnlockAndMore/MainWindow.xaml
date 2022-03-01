@@ -58,7 +58,7 @@
                 </Expander>
                 <Label HorizontalAlignment="Right" FontSize="12 px" TabIndex="22">
                     <Hyperlink NavigateUri="https://github.com/uberhalit/EldenRingFpsUnlockAndMore" RequestNavigate="Hyperlink_RequestNavigate" Cursor="Hand">
-                        v1.0.0.0 - by uberhalit
+                        v1.0.0.1 - by uberhalit
                     </Hyperlink>
                 </Label>
             </StackPanel>
