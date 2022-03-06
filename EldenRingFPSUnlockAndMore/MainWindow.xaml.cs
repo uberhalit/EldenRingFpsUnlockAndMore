@@ -273,25 +273,29 @@ namespace EldenRingFPSUnlockAndMore
                 Environment.Exit(0);
             }
 
-            // start steam
-            Process[] procList = Process.GetProcessesByName("steam");
-            if (procList.Length == 0)
-            {
-                ProcessStartInfo siSteam = new ProcessStartInfo
-                {
-                    WindowStyle = ProcessWindowStyle.Minimized,
-                    Verb = "open",
-                    FileName = "steam://open/console",
-                };
-                Process procSteam = new Process
-                {
-                    StartInfo = siSteam
-                };
-                procSteam.Start();
-                await WaitForProgram("steam", 6000);
-                await Task.Delay(4000);
-            }
 
+            // Only run if "Don't run Steam" is not checked
+            if (cbDontRunSteam.IsChecked == false ) 
+               {                
+                // start steam
+                Process[] procList = Process.GetProcessesByName("steam");
+                if (procList.Length == 0)
+                {
+                    ProcessStartInfo siSteam = new ProcessStartInfo
+                    {
+                        WindowStyle = ProcessWindowStyle.Minimized,
+                        Verb = "open",
+                        FileName = "steam://open/console",
+                    };
+                    Process procSteam = new Process
+                    {
+                        StartInfo = siSteam
+                    };
+                    procSteam.Start();
+                    await WaitForProgram("steam", 6000);
+                    await Task.Delay(4000);
+                }
+            }
             // start the game
             ProcessStartInfo siGame = new ProcessStartInfo
             {
@@ -1115,5 +1119,10 @@ namespace EldenRingFPSUnlockAndMore
         }
 
         #endregion
+
+        private void cbAddWidescreen_Checked(object sender, RoutedEventArgs e)
+        {
+
+        }
     }
 }
