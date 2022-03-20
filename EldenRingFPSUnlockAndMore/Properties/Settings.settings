@@ -26,6 +26,9 @@
     <Setting Name="DisablePenaltyTicked" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
     </Setting>
+    <Setting Name="DisableCamRotationTicked" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">False</Value>
+    </Setting>
     <Setting Name="GameName" Type="System.String" Scope="User">
       <Value Profile="(Default)">eldenring</Value>
     </Setting>

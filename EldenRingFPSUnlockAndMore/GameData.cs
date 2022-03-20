@@ -124,5 +124,23 @@ namespace EldenRingFPSUnlockAndMore
         internal const string PATTERN_TIMESCALE = "48 8B 05 ?? ?? ?? ?? F3 0F 10 88 ?? ?? ?? ?? F3 0F";
         internal const int PATTERN_TIMESCALE_OFFSET = 3;
         internal const int PATTERN_TIMESCALE_POINTER_OFFSET = 8;
+
+        /**
+         *  
+         *  00007FF68F98F98B | 0F29A6 50010000          | movaps xmmword ptr ds:[rsi+150],xmm4    | this will get nop'ed
+            00007FF68F98F992 | 41:0F28CF                | movaps xmm1,xmm15                       |
+            00007FF68F98F996 | 48:8BCE                  | mov rcx,rsi                             |
+            00007FF68F98F999 | E8 122F0000              | call eldenring.7FF68F9928B0             |
+            00007FF68F98F99E | 44:0FB64424 30           | movzx r8d,byte ptr ss:[rsp+30]          |
+            00007FF68F98F9A4 | 41:0F28CF                | movaps xmm1,xmm15                       |
+            00007FF68F98F9A8 | 48:8BCE                  | mov rcx,rsi                             |
+
+            00007FF68F98F98B (Version 1.2.0.0)
+         */
+        internal const string PATTERN_CAMERA_ROTATION = "0f 29 a6 ?? ?? ?? ?? 41 0f 28 cf";
+        internal const int PATTERN_CAMERA_ROTATION_OFFSET = 0;
+        internal const int PATCH_CAMERA_ROTATION_INSTRUCTION_LENGTH = 7;
+        internal static readonly byte[] PATCH_CAMERA_ROTATION_ENABLE = new byte[] { 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90 }; // nop
+
     }
 }
