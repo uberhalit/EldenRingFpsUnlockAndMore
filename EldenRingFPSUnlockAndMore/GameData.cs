@@ -125,9 +125,10 @@ namespace EldenRingFPSUnlockAndMore
         internal const int PATTERN_TIMESCALE_OFFSET = 3;
         internal const int PATTERN_TIMESCALE_POINTER_OFFSET = 8;
 
+
         /**
-         *  
-         *  00007FF68F98F98B | 0F29A6 50010000          | movaps xmmword ptr ds:[rsi+150],xmm4    | this will get nop'ed
+            Controls automatic camera yaw adjust on move. xmm4 holds new yaw while rsi+150 is current one prior movement so we skip the instruction.  
+            00007FF68F98F98B | 0F29A6 50010000          | movaps xmmword ptr ds:[rsi+150],xmm4    | this will get nop'ed
             00007FF68F98F992 | 41:0F28CF                | movaps xmm1,xmm15                       |
             00007FF68F98F996 | 48:8BCE                  | mov rcx,rsi                             |
             00007FF68F98F999 | E8 122F0000              | call eldenring.7FF68F9928B0             |
@@ -137,10 +138,26 @@ namespace EldenRingFPSUnlockAndMore
 
             00007FF68F98F98B (Version 1.2.0.0)
          */
-        internal const string PATTERN_CAMERA_ROTATION = "0f 29 a6 ?? ?? ?? ?? 41 0f 28 cf";
+        internal const string PATTERN_CAMERA_ROTATION = "0F 29 A6 ?? ?? ?? ?? 41 0F 28 CF";
         internal const int PATTERN_CAMERA_ROTATION_OFFSET = 0;
         internal const int PATCH_CAMERA_ROTATION_INSTRUCTION_LENGTH = 7;
         internal static readonly byte[] PATCH_CAMERA_ROTATION_ENABLE = new byte[] { 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90 }; // nop
 
+
+        /**
+            When user presses button to lock on target but no target is in range a camera reset is triggered to center cam position. This compare decides if we need to reset or not.
+            00007FF725C201A6 | 80BE 31030000 00            | cmp byte ptr ds:[rsi+331],0                                    | Check if no target is in sight
+            00007FF725C201AD | 74 0A                       | je eldenring.7FF725C201B9                                      | 
+            00007FF725C201AF | 48:8BCE                     | mov rcx,rsi                                                    |
+            00007FF725C201B2 | E8 49010000                 | call eldenring.7FF725C20300                                    | -> call CamReset()
+            00007FF725C201B7 | EB 49                       | jmp eldenring.7FF725C20202                                     |
+            00007FF725C201B9 | 0F2886 E0000000             | movaps xmm0,xmmword ptr ds:[rsi+E0]                            |
+
+            00007FF725C201A (Version 1.3.1.0)
+         */
+        internal const string PATTERN_CAMRESET_LOCKON = "80 BE ?? ?? ?? ?? 00 74 ?? 48 ?? ?? E8 ?? ?? ?? ?? EB ?? 0F";
+        internal const int PATTERN_CAMRESET_LOCKON_OFFSET = 7;
+        internal static readonly byte[] PATCH_CAMRESET_LOCKON_ENABLE = new byte[1] { 0xEB }; // jmp
+        internal static readonly byte[] PATCH_CAMRESET_LOCKON_DISABLE = new byte[1] { 0x74 }; // je
     }
 }

@@ -11,6 +11,8 @@ Patches games memory while running, does not modify any game files. Works with e
 * unlock frame rate (remove FPS limit)
 * remove forced 60 Hertz (Hz) limit in fullscreen
 * increase or decrease field of view (FOV)
+* disable camera auto rotate adjustment on movement (intended for mouse users)
+* disable centering of camera (cam reset) on lock-on if there is no target
 * add support for widescreen monitors
 * game modifications
   * global game speed modifier (increase or decrease)
@@ -71,6 +73,15 @@ Increase or decrease the games Field Of Fiew (FOV) between -95% and +95%.
 ### On 'Widescreen support'
 Adds your monitors **native resolution** to the games video options overwriting the default 1920x1080 resolution. This will allow widescreen monitors to use their full resolution and aspect ratio.
 
+### On 'Disable Steam check'
+Normally you don't have to tick this checkbox (except when you are drinking rum while sailing the sea). Ticking this will tell the utility to not start Steam when it tries to launch the game. If your game isn't starting then untick this.
+
+### On 'Disable camera auto rotate on movement':
+Will disable the automatic camera rotation adjustments when you are moving. This is mostly intended for mouse users, enabling it on non-native windows controllers might not work correctly.
+
+## On 'Disable camera reset on lock-on':
+If you press your target lock-on key and no target is in sight the game will reset the camera position and disable your input while it's doing so. Ticking this checkbox will remove this behaviour of the game.
+
 ### On 'Disable Runes loss on death':
 Like 'Unseen Aid' in Sekiro you will not lose any Runes upon death with this option enabled.
 
@@ -81,6 +92,7 @@ Slow down the game to beat a boss like a game journalist or speed it up and beco
 * Make sure you followed the appropriate steps and didn't skip any
 * Try disabling `Fullscreen optimization` for Elden Ring: right mouse click on `eldenring.exe -> Compatibility-> tick 'Disable fullscreen optimizations'`
 * If you are using ReShade make sure your preset doesn't enforce 60 Hz, try removing ReShade and see if it solves the problem
+* Game isn't starting when you click "Start game"? Untick 'Disable Steam check'
 * Try adding the whole game folder and `Elden Ring FPS Unlocker and more` to your antivirus's exclusion list
 * Try disabling `Steam Broadcast` (streaming via overlay)
 * Try to force disable VSYNC even when you are using GSYNC/FreeSync/FastSync
@@ -112,6 +124,7 @@ Feel free to open an issue or create a pull request at any time
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details
 
 ## Credits
+* huovnn for their contribution to disable the automatic camera adjustments on movement
 * [Darius Dan](http://www.dariusdan.com) for the icon
 
 ## Limitations
@@ -121,6 +134,10 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 * game speed modification can potentially crash the game in certain cutscenes and NPC interactions, use with caution
 
 ## Version History
+* v1.1.0.0 (2022-03-22)
+  * added option to disable camera auto-rotate
+  * added option to disable camera reset on lock-on if no target is in range
+  * added option to disable Steam-check
 * v1.0.0.1 (2022-02-28)
   * fixed an issue with pattern on 'disabling runes loss'
 * v1.0.0.0 (2022-02-28)
