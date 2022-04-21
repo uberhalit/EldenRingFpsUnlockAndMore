@@ -66,7 +66,7 @@ namespace EldenRingFPSUnlockAndMore
             00007FF7A30C8D80 | 74 39                      | je eldenring.7FF7A30C8DBB                                      |
             00007FF7A30C8D82 | 41:8BD3                    | mov edx,r11d                                                   |
          */
-        internal const string PATTERN_RESOLUTION_SCALING_FIX = "8B ?? 85 ?? 74 ?? 44 8B ?? ?? 45 85 ?? 74 ?? 41 8B";
+        internal const string PATTERN_RESOLUTION_SCALING_FIX = "74 50 ?? 8B ?? ?? DC 03 00 00 ?? 85 ?? 74 ?? ?? 8B ?? ?? 0F AF";
         internal const int PATTERN_RESOLUTION_SCALING_FIX_OFFSET = 4;
         internal static readonly byte[] PATCH_RESOLUTION_SCALING_FIX_ENABLE = new byte[] { 0xEB };  // jmp
         internal static readonly byte[] PATCH_RESOLUTION_SCALING_FIX_DISABLE = new byte[] { 0x74 }; // je
