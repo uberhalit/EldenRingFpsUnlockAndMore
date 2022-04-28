@@ -36,7 +36,7 @@ namespace EldenRingFPSUnlockAndMore
             00007FF7A30CAB2E | C745 F3 01000000           | mov dword ptr ss:[rbp-D],1                                     | 1 indicates a hertz change
             00007FF7A30CAB35 | 8B87 940E0000              | mov eax,dword ptr ds:[rdi+E94]                                 |
             00007FF7A30CAB3B | 44:8BB3 54010000           | mov r14d,dword ptr ds:[rbx+154]                                |
-            
+
             00007FF7A30CAB27 (Version 1.2.0.0)
          */
         internal const string PATTERN_HERTZLOCK = "EB ?? C7 ?? ?? 3C 00 00 00 C7 ?? ?? 01 00 00 00";
@@ -66,8 +66,10 @@ namespace EldenRingFPSUnlockAndMore
             00007FF7A30C8D80 | 74 39                      | je eldenring.7FF7A30C8DBB                                      |
             00007FF7A30C8D82 | 41:8BD3                    | mov edx,r11d                                                   |
          */
-        internal const string PATTERN_RESOLUTION_SCALING_FIX = "8B ?? 85 ?? 74 ?? 44 8B ?? ?? 45 85 ?? 74 ?? 41 8B";
-        internal const int PATTERN_RESOLUTION_SCALING_FIX_OFFSET = 4;
+
+        // Fix for 1.04 (thanks techiew) documentation: https://github.com/techiew/EldenRingMods/blob/master/UltrawideFix/documentation.txt
+        internal const string PATTERN_RESOLUTION_SCALING_FIX = "74 50 ?? 8B ?? ?? DC 03 00 00 ?? 85 ?? 74 ?? ?? 8B ?? ?? 0F AF";
+        internal const int PATTERN_RESOLUTION_SCALING_FIX_OFFSET = 0;
         internal static readonly byte[] PATCH_RESOLUTION_SCALING_FIX_ENABLE = new byte[] { 0xEB };  // jmp
         internal static readonly byte[] PATCH_RESOLUTION_SCALING_FIX_DISABLE = new byte[] { 0x74 }; // je
 
@@ -78,7 +80,7 @@ namespace EldenRingFPSUnlockAndMore
             00007FF709FD0DF9 | 80BB 88040000 00           | cmp byte ptr ds:[rbx+488],0                                    | -> code cave jump inject here
             00007FF709FD0E00 | 44:0F28E0                  | movaps xmm12,xmm0                                              | save FOV multiplier from xmm0 to xmm12 <- jump back here
             00007FF709FD0E04 | F344:0F1005 7BE2E102       | movss xmm8,dword ptr ds:[7FF70CDEF088]                         |
-            00007FF709FD0E0D | 45:0F57D2                  | xorps xmm10,xmm10                                              | 
+            00007FF709FD0E0D | 45:0F57D2                  | xorps xmm10,xmm10                                              |
             00007FF709FD0E11 | F345:0F59E7                | mulss xmm12,xmm15                                              |
 
             00007FF709FD0E00 (Version 1.2.0.0)
@@ -127,7 +129,7 @@ namespace EldenRingFPSUnlockAndMore
 
 
         /**
-            Controls automatic camera yaw adjust on move. xmm4 holds new yaw while rsi+150 is current one prior movement so we skip the instruction.  
+            Controls automatic camera yaw adjust on move. xmm4 holds new yaw while rsi+150 is current one prior movement so we skip the instruction.
             00007FF68F98F98B | 0F29A6 50010000          | movaps xmmword ptr ds:[rsi+150],xmm4    | this will get nop'ed
             00007FF68F98F992 | 41:0F28CF                | movaps xmm1,xmm15                       |
             00007FF68F98F996 | 48:8BCE                  | mov rcx,rsi                             |
@@ -147,7 +149,7 @@ namespace EldenRingFPSUnlockAndMore
         /**
             When user presses button to lock on target but no target is in range a camera reset is triggered to center cam position. This compare decides if we need to reset or not.
             00007FF725C201A6 | 80BE 31030000 00            | cmp byte ptr ds:[rsi+331],0                                    | Check if no target is in sight
-            00007FF725C201AD | 74 0A                       | je eldenring.7FF725C201B9                                      | 
+            00007FF725C201AD | 74 0A                       | je eldenring.7FF725C201B9                                      |
             00007FF725C201AF | 48:8BCE                     | mov rcx,rsi                                                    |
             00007FF725C201B2 | E8 49010000                 | call eldenring.7FF725C20300                                    | -> call CamReset()
             00007FF725C201B7 | EB 49                       | jmp eldenring.7FF725C20202                                     |
@@ -159,5 +161,17 @@ namespace EldenRingFPSUnlockAndMore
         internal const int PATTERN_CAMRESET_LOCKON_OFFSET = 7;
         internal static readonly byte[] PATCH_CAMRESET_LOCKON_ENABLE = new byte[1] { 0xEB }; // jmp
         internal static readonly byte[] PATCH_CAMRESET_LOCKON_DISABLE = new byte[1] { 0x74 }; // je
+
+        // Vignette removal
+        // Documentation (thanks techiew): https://github.com/techiew/EldenRingMods/blob/master/RemoveVignette/documentation.txt
+        internal const string PATTERN_VIGNETTE_REMOVAL = "F3 0F 10 ?? 50 F3 0F 59 ?? ?? ?? ?? ?? E8 ?? ?? ?? ?? F3 ?? 0F 5C ?? F3 ?? 0F 59 ?? ?? 8D ?? ?? A0 00 00 00";
+        internal const int PATTERN_VIGNETTE_REMOVAL_OFFSET = 23;
+        internal static readonly byte[] PATCH_VIGNETTE_REMOVE = new byte[5] { 0xF3, 0x0F, 0x5C, 0xC0, 0x90 };
+
+        // Chromatic Aberration removal
+        // Documentation (thanks techiew): https://github.com/techiew/EldenRingMods/blob/master/RemoveChromaticAberration/documentation.txt
+        internal const string PATTERN_CHROMATIC_ABERRATION = "0F 11 ?? 60 ?? 8D ?? 80 00 00 00 0F 10 ?? A0 00 00 00 0F 11 ?? F0 ?? 8D ?? B0 00 00 00 0F 10 ?? 0F 11 ?? 0F 10 ?? 10 0F 11 ?? 10 0F 10 ?? 20 0F 11 ?? 20";
+        internal const int PATTERN_CHROMATIC_ABERRATION_OFFSET = 47;
+        internal static readonly byte[] PATCH_CHROMATIC_ABERRATION_DISABLE = new byte[4] { 0x66, 0x0F, 0xEF, 0xC9 };
     }
 }
