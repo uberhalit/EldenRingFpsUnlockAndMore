@@ -142,6 +142,18 @@ namespace EldenRingFPSUnlockAndMore.Properties {
                 this["GameName"] = value;
             }
         }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("launch_elden_ring_seamlesscoop")]
+        public string SeamlessMP {
+            get {
+                return ((string)(this["SeamlessMP"]));
+            }
+            set {
+                this["SeamlessMP"] = value;
+            }
+        }
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]

@@ -248,7 +248,9 @@ namespace EldenRingFPSUnlockAndMore
                     gameExePath = PromptForGamePath();
                 else
                 {
-                    if (File.Exists(Path.Combine(gamePath, "GAME", $"{Properties.Settings.Default.GameName}.exe")))
+                    if (File.Exists(Path.Combine(gamePath, "GAME", $"{Properties.Settings.Default.SeamlessMP}.exe")))
+                        gameExePath = Path.Combine(gamePath, "GAME", $"{Properties.Settings.Default.SeamlessMP}.exe");
+                    else if (File.Exists(Path.Combine(gamePath, "GAME", $"{Properties.Settings.Default.GameName}.exe")))
                         gameExePath = Path.Combine(gamePath, "GAME", $"{Properties.Settings.Default.GameName}.exe");
                     else if (File.Exists(Path.Combine(gamePath, $"{Properties.Settings.Default.GameName}.exe")))
                         gameExePath = Path.Combine(gamePath, $"{Properties.Settings.Default.GameName}.exe");
@@ -259,8 +261,13 @@ namespace EldenRingFPSUnlockAndMore
             else
             {
                 var fileInfo = FileVersionInfo.GetVersionInfo(gameExePath);
-                if (!fileInfo.FileDescription.ToLower().Contains(GameData.PROCESS_DESCRIPTION))
-                    gameExePath = PromptForGamePath();
+                var filesDescription = fileInfo.FileDescription;
+                if (!gameExePath.ToLower().Contains("seamlesscoop.exe"))
+                {
+                    if (!fileInfo.FileDescription.ToLower().Contains(GameData.PROCESS_DESCRIPTION))
+                        gameExePath = PromptForGamePath();
+                }
+                    
             }
             Properties.Settings.Default.GamePath = gameExePath;
             gamePath = Path.GetDirectoryName(gameExePath);
@@ -275,6 +282,8 @@ namespace EldenRingFPSUnlockAndMore
                 MessageBox.Show("Couldn't write steam id file!", "Elden Ring FPS Unlocker and more", MessageBoxButton.OK, MessageBoxImage.Exclamation);
                 Environment.Exit(0);
             }
+
+            
 
             // start steam
             if (cbDisableSteamCheck.IsChecked == false)
@@ -298,6 +307,8 @@ namespace EldenRingFPSUnlockAndMore
                 }
             }
 
+            string gameExePathArg = gameExePath.ToLower().Contains("seamlesscoop.exe") ? Properties.Settings.Default.SeamlessMP : Properties.Settings.Default.GamePath;
+
             // start the game
             ProcessStartInfo siGame = new ProcessStartInfo
             {
@@ -305,14 +316,14 @@ namespace EldenRingFPSUnlockAndMore
                 Verb = "runas",
                 FileName = "cmd.exe",
                 WorkingDirectory = gamePath,
-                Arguments = $"/C \"{Properties.Settings.Default.GameName}.exe -noeac\""
+                Arguments = $"/C \"{gameExePathArg}.exe -noeac\""
             };
             Process procGameStarter = new Process
             {
                 StartInfo = siGame
             };
             procGameStarter.Start();
-            await WaitForProgram(Properties.Settings.Default.GameName, 10000);
+            await WaitForProgram(gameExePathArg, 10000);
             await Task.Delay(4000);
             procGameStarter.Close();
             _startup = false;
