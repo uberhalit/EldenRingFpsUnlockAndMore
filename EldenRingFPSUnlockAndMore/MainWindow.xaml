@@ -7,7 +7,7 @@
         xmlns:p="clr-namespace:EldenRingFPSUnlockAndMore.Properties" 
         mc:Ignorable="d"
         Title="Elden Ring FPS Unlocker and more" Width="Auto" Height="Auto" SizeToContent="WidthAndHeight" ResizeMode="CanMinimize" Loaded="Window_Loaded" Closing="Window_Closing" >
-    
+
     <Grid x:Name="gMainGrid" Background="#FFF9F9F9">
         <DockPanel>
             <StackPanel DockPanel.Dock="Top" Margin="10,10,10,0" Width="300" Height="Auto">
@@ -27,6 +27,9 @@
                 </DockPanel>
                 <DockPanel Margin="0,5,0,0" LastChildFill="False">
                     <CheckBox x:Name="cbDisableSteamCheck" DockPanel.Dock="Left" Margin="0,0,0,0" Height="25" FontSize="14 px" VerticalContentAlignment="Center" Content="Disable Steam check" ToolTip="Won't check nor auto-start Steam, untick this if your game doesn't start" IsChecked="{Binding DisableSteamCheckTicked, Mode=TwoWay, Source={x:Static p:Settings.Default}, UpdateSourceTrigger=PropertyChanged}" TabIndex="3" />
+                </DockPanel>
+                <DockPanel Margin="0,5,0,0" LastChildFill="False">
+                    <CheckBox x:Name="cbAutoStart" DockPanel.Dock="Left" Margin="0,0,0,0" Height="25" FontSize="14 px" VerticalContentAlignment="Center" Content="Auto start" ToolTip="Automatically start the game when opening this form" IsChecked="{Binding AutoStartTicked, Mode=TwoWay, Source={x:Static p:Settings.Default}, UpdateSourceTrigger=PropertyChanged}" TabIndex="3" />
                 </DockPanel>
                 <Expander x:Name="exGameMods" Height="Auto" FontSize="14 px" Header="Modifications" IsExpanded="True" TabIndex="11">
                     <Grid x:Name="gSubGrid1" Margin="3,1,0,0" Background="#FFF9F9F9">
