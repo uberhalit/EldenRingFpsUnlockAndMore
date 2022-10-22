@@ -72,7 +72,7 @@ namespace EldenRingFPSUnlockAndMore
         /// <summary>
         /// On window loaded.
         /// </summary>
-        private void Window_Loaded(object sender, RoutedEventArgs e)
+        private async void Window_Loaded(object sender, RoutedEventArgs e)
         {
             string local = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
             _path_logs = Path.Combine(local, "EldenRingFPSUnlockAndMore", "logs.log");
@@ -112,6 +112,11 @@ namespace EldenRingFPSUnlockAndMore
 
             ResetGame();
             bStart.IsEnabled = true;
+
+            if (Properties.Settings.Default.AutoStartTicked)
+            {
+                await doStartClick();
+            }
         }
 
         /// <summary>
@@ -1115,6 +1120,18 @@ namespace EldenRingFPSUnlockAndMore
             tbStatus.Text = $"{DateTime.Now:HH:mm:ss} {text}";
         }
 
+        private async Task doStartClick()
+        {
+            bStart.IsEnabled = false;
+            bool res = await CheckGame();
+            if (!res)
+            {
+                ResetGame();
+                await SafeStartGame();
+            }
+            bStart.IsEnabled = true;
+        }
+
         #region EventHandler
 
         private void Hyperlink_RequestNavigate(object sender, System.Windows.Navigation.RequestNavigateEventArgs e)
@@ -1130,14 +1147,7 @@ namespace EldenRingFPSUnlockAndMore
 
         private async void bStart_Click(object sender, RoutedEventArgs e)
         {
-            bStart.IsEnabled = false;
-            bool res = await CheckGame();
-            if (!res)
-            {
-                ResetGame();
-                await SafeStartGame();
-            }
-            bStart.IsEnabled = true;
+            await doStartClick();
         }
 
         private void BFov0_Click(object sender, RoutedEventArgs e)
